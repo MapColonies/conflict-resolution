@@ -13,6 +13,7 @@ import { PaginationQueryDto } from 'src/global/models/pagination-query-dto';
 import { ConflictQueryDto } from 'src/conflict/models/conflict-query-dto';
 import { HttpResponse } from 'src/global/models/http-response';
 import { ResolveDto } from 'src/result/models/resolve-dto';
+import { ConflictTextSearchDto } from './models/conflict-text-search-dto';
 
 @ApiTags('conflict')
 @Controller('conflict')
@@ -25,11 +26,10 @@ export class ConflictController {
         type: PaginationResult
     })
     async getAllConflicts(@Query() query: PaginationQueryDto): Promise<PaginationResult<Conflict>> {
-        console.log(query)
         return await this.conflictService.getAll(new PaginationConfig(query.page, query.limit));
     }
 
-    @Get('search')
+    @Get('query')
     @ApiResponse({
         status: 200,
         type: PaginationResult
@@ -44,10 +44,19 @@ export class ConflictController {
             keywords,
             resolved
         );
-        return await this.conflictService.search(
+        return await this.conflictService.query(
             conflictQueryParams,
             new PaginationConfig(page, limit)
         );
+    }
+
+    @Get('search')
+    @ApiResponse({
+        status: 200,
+        type: PaginationResult
+    })
+    async filterConflicts(@Query() query: ConflictTextSearchDto) {
+        return await this.conflictService.search(query.text, new PaginationConfig(query.page, query.limit));
     }
 
     @Get(':id')

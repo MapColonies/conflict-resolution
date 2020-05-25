@@ -2,8 +2,30 @@ module.exports = [
   {
     requesting_server: 'server1',
     requested_server: 'server2',
-    requesting_entity: '111',
-    requested_entity: '222',
+    requesting_entity: {
+      glossary: {
+        title: 'example glossary',
+        GlossDiv: {
+          title: 'S',
+          GlossList: {
+            GlossEntry: {
+              ID: 'SGML',
+              SortAs: 'SGML',
+              GlossTerm: 'Standard Generalized Markup Language',
+              Acronym: 'SGML',
+              Abbrev: 'ISO 8879:1986',
+              GlossDef: {
+                para:
+                  'A meta-markup language, used to create markup languages such as DocBook.',
+                GlossSeeAlso: ['GML', 'XML'],
+              },
+              GlossSee: 'markup',
+            },
+          },
+        },
+      },
+    },
+    requested_entity: {},
     description: 'some desc 1',
     has_resolved: false,
   },

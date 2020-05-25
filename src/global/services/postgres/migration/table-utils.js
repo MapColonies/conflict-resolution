@@ -1,10 +1,10 @@
-const addDefaultColumns = (table) => {
+const addDefaultColumns = table => {
   table.timestamps(false, true);
   table.datetime('deleted_at');
 };
 
 const createDummyTable = (knex, tableName) => {
-  return knex.schema.createTable(tableName, (table) => {
+  return knex.schema.createTable(tableName, table => {
     table.increments().notNullable();
     addDefaultColumns(table);
   });
@@ -15,7 +15,7 @@ const createReference = (
   tableName,
   deleteFunc = 'set null',
   nullable = false,
-  columnName = ''
+  columnName = '',
 ) => {
   const definition = table
     .uuid(`${columnName || tableName}_id`)
@@ -30,9 +30,20 @@ const createReference = (
 };
 
 const rollbackDropReference = async (knex, tableName, foreignKey) => {
-  await knex.schema.table(tableName, async (t) => {
+  await knex.schema.table(tableName, async t => {
     t.dropForeign(foreignKey);
     t.dropColumn(foreignKey);
+  });
+};
+
+const rollbackDropIndex = async (
+  knex,
+  tableName,
+  columnName,
+  indexName = null,
+) => {
+  await knex.schema.table(tableName, async t => {
+    t.dropIndex(columnName, indexName);
   });
 };
 
@@ -41,4 +52,5 @@ module.exports = {
   createDummyTable,
   createReference,
   rollbackDropReference,
+  rollbackDropIndex,
 };

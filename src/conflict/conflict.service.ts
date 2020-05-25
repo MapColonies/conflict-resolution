@@ -33,6 +33,15 @@ export class ConflictService {
             asGeojson ? postgis.asGeoJSON('location') : null)
     };
 
+    async search(text: string, paginationConfig: PaginationConfig) {
+        return await this.queryService.fullTextSearch(tableNames.conflict,
+            "requesting_entity",
+            text,
+            paginationConfig,
+            postgis.asGeoJSON('location')
+        );
+    };
+    
     async create(conflictDto: ConflictDto): Promise<Conflict> {
         return await this.queryService.createRecord(
             tableNames.conflict,
@@ -76,7 +85,7 @@ export class ConflictService {
         }
     }
 
-    async search(conflictQueryParams: ConflictQueryParams, paginationConfig: PaginationConfig): Promise<PaginationResult<Conflict>> {
+    async query(conflictQueryParams: ConflictQueryParams, paginationConfig: PaginationConfig): Promise<PaginationResult<Conflict>> {
         if (!conflictQueryParams.isValid()) {
             throw new BadRequestException(null, 'Query is invalid.')
         }
