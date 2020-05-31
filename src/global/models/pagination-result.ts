@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 
-import { Conflict } from '../../conflict/models/conflict';
-import { FullResult } from 'src/result/models/full-result';
+import { Conflict } from '../../conflicts/models/conflict';
+import { FullResult } from 'src/results/models/full-result';
 
 export class PaginationResult<T> {
     @ApiProperty()

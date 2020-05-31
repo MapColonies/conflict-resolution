@@ -18,7 +18,7 @@ const createReference = (
   columnName = '',
 ) => {
   const definition = table
-    .uuid(`${columnName || tableName}_id`)
+    .uuid(`${columnName || convertToSingular(tableName)}_id`)
     .references('id')
     .inTable(tableName)
     .onDelete(deleteFunc);
@@ -30,9 +30,10 @@ const createReference = (
 };
 
 const rollbackDropReference = async (knex, tableName, foreignKey) => {
+  const fkName = convertToSingular(foreignKey);
   await knex.schema.table(tableName, async t => {
-    t.dropForeign(foreignKey);
-    t.dropColumn(foreignKey);
+    t.dropForeign(fkName);
+    t.dropColumn(fkName);
   });
 };
 
@@ -46,6 +47,13 @@ const rollbackDropIndex = async (
     t.dropIndex(columnName, indexName);
   });
 };
+
+const convertToSingular = word => {
+  if (word.slice(-1) === 's') {
+    return word.slice(0, -1);
+  }
+  return word;
+}
 
 module.exports = {
   addDefaultColumns,

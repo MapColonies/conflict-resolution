@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import { Injectable, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { InjectKnex, Knex } from 'nestjs-knex';
 
@@ -9,33 +8,33 @@ import { ConflictDto } from './models/conflict-dto';
 import { setSRID } from '../global/services/postgis/util'
 import { Conflict } from './models/conflict';
 import { PaginationResult } from 'src/global/models/pagination-result';
-import { queryConflicts } from './conflict.queries';
-import { ConflictQueryParams } from 'src/conflict/models/conflict-query-params';
+import { queryConflicts } from './conflicts.queries';
+import { ConflictQueryParams } from 'src/conflicts/models/conflict-query-params';
 import { QueryService } from 'src/shared/query.service';
 
 @Injectable()
-export class ConflictService {
+export class ConflictsService {
     constructor(
         @InjectKnex() private readonly knex: Knex,
         private readonly queryService: QueryService
     ) { }
 
     async getAll(paginationConfig: PaginationConfig): Promise<PaginationResult<Conflict>> {
-        return await this.queryService.getAllRecords(tableNames.conflict,
+        return await this.queryService.getAllRecords(tableNames.conflicts,
             paginationConfig,
             postgis.asGeoJSON('location')
         );
     };
 
     async getById(id: string, asGeojson = true): Promise<Conflict> {
-        return await this.queryService.getRecordById(tableNames.conflict,
+        return await this.queryService.getRecordById(tableNames.conflicts,
             id,
             asGeojson ? postgis.asGeoJSON('location') : null)
     };
 
     async search(text: string, paginationConfig: PaginationConfig) {
-        return await this.queryService.fullTextSearch(tableNames.conflict,
-            "requesting_entity",
+        return await this.queryService.fullTextSearch(tableNames.conflicts,
+            ["target_entity", "source_entity"],
             text,
             paginationConfig,
             postgis.asGeoJSON('location')
@@ -44,28 +43,28 @@ export class ConflictService {
     
     async create(conflictDto: ConflictDto): Promise<Conflict> {
         return await this.queryService.createRecord(
-            tableNames.conflict,
+            tableNames.conflicts,
             this.parseLocation(conflictDto, 'location')
         );
     }
 
     async update(id: string, conflictDto: ConflictDto): Promise<Conflict> {
         return await this.queryService.updateRecord(
-            tableNames.conflict,
+            tableNames.conflicts,
             id,
             this.parseLocation(conflictDto, 'location')
         );
     }
 
     async delete(id: string) {
-        return await this.queryService.deleteRecord(tableNames.conflict, id);
+        return await this.queryService.deleteRecord(tableNames.conflicts, id);
     }
 
     async resolve(conflict: Conflict, result: {}): Promise<void> {
         try {
             await this.knex.transaction(async (trx) => {
                 const createdResult = (
-                    await this.queryService.createRecord(tableNames.result, result, null, trx)
+                    await this.queryService.createRecord(tableNames.results, result, null, trx)
                 );
                 
                 conflict.has_resolved = true;
@@ -73,7 +72,7 @@ export class ConflictService {
                 conflict.result_id = createdResult.id;
 
                 await this.queryService.updateRecord(
-                    tableNames.conflict,
+                    tableNames.conflicts,
                     conflict.id,
                     conflict,
                     null,

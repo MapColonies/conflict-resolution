@@ -1,4 +1,5 @@
+import tableNames = require('./migration/table-names')
+
 export = {
-    conflict: 'conflict',
-    result: 'result'
+    ...tableNames
 }

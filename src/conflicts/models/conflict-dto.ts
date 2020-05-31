@@ -9,25 +9,25 @@ export class ConflictDto {
     @IsString()
     @IsNotEmpty()
     @Type(() => String)
-    requesting_server: string;
+    source_server: string;
 
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
     @Type(() => String)
-    requested_server: string;
+    target_server: string;
 
     @ApiProperty()
-    @IsString()
+    @IsObject()
     @IsNotEmpty()
-    @Type(() => String)
-    requesting_entity: string;
+    @Type(() => Object)
+    source_entity: object;
 
     @ApiProperty()
-    @IsString()
+    @IsObject()
     @IsNotEmpty()
-    @Type(() => String)
-    requested_entity: string;
+    @Type(() => Object)
+    target_entity: object;
 
     @ApiPropertyOptional()
     @IsString()

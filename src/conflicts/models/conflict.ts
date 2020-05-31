@@ -7,16 +7,16 @@ export class Conflict {
     id: string;
 
     @ApiProperty()
-    requesting_server: string;
+    source_server: string;
 
     @ApiProperty()
-    requested_server: string;
+    target_server: string;
 
     @ApiProperty()
-    requesting_entity: string;
+    source_entity: object;
 
     @ApiProperty()
-    requested_entity: string;
+    target_entity: object;
 
     @ApiProperty()
     description: string;

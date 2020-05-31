@@ -1,7 +1,7 @@
 // TODO: support in transaction
 import { countRecords } from './queries';
 import { PaginationConfig } from '../../models/pagination-config';
-import { ConflictQueryParams } from 'src/conflict/models/conflict-query-params';
+import { ConflictQueryParams } from 'src/conflicts/models/conflict-query-params';
 
 export const paginate = async (query: any, paginationConfig: PaginationConfig, queryParams: ConflictQueryParams = null) => {  
   const result: any = {};

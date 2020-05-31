@@ -4,11 +4,12 @@ import { APP_PIPE } from '@nestjs/core';
 
 import { NODE_ENV } from './config/app-conflig';
 import knexConfig = require('../knexfile');
-import { ConflictController } from './conflict/conflict.controller';
-import { ConflictService } from './conflict/conflict.service';
-import { ResultService } from './result/result.service';
-import { ResultController } from './result/result.controller';
+import { ConflictsController } from './conflicts/conflicts.controller';
+import { ConflictsService } from './conflicts/conflicts.service';
+import { ResultsService } from './results/results.service';
+import { ResultsController } from './results/results.controller';
 import { QueryService } from './shared/query.service';
+import { ResponseHelperService } from './shared/response-helper.service';
 
 @Module({
   imports: [
@@ -18,12 +19,12 @@ import { QueryService } from './shared/query.service';
       }),
     }),
   ],
-  controllers: [ConflictController, ResultController],
+  controllers: [ConflictsController, ResultsController],
   providers: [
     {
       provide: APP_PIPE,
       useValue: new ValidationPipe({ transform: true }),
     },
-    ConflictService, ResultService, QueryService],
+    ConflictsService, ResultsService, QueryService, ResponseHelperService],
 })
 export class AppModule { }

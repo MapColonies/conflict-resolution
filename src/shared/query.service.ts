@@ -5,7 +5,7 @@ import { InjectKnex, Knex as NestKnex } from 'nestjs-knex';
 
 import { paginate } from '../global/services/postgres/pagination';
 import { PaginationConfig } from '../global/models/pagination-config';
-import { ConflictQueryParams } from 'src/conflict/models/conflict-query-params';
+import { ConflictQueryParams } from 'src/conflicts/models/conflict-query-params';
 import { TEXT_SEARCH_VECTOR_TYPE } from '../global/services/postgres/migration/custom-functions'
 
 
@@ -15,10 +15,19 @@ export class QueryService {
         @InjectKnex() private readonly knex: NestKnex,
     ) { }
 
-    async fullTextSearch(tableName: string, fieldName: string, text: string, paginationConf: PaginationConfig, selectionFunc?: any, fields?: string[]) {
+    async fullTextSearch(tableName: string, fieldNames: string[], text: string, paginationConf: PaginationConfig, selectionFunc?: any, fields?: string[]) {
         const selectedFields = this.setFields(fields);
         const query = this.knex(tableName).select(selectedFields);
-        query.whereRaw(`to_tsvector('${TEXT_SEARCH_VECTOR_TYPE}', ${fieldName}::jsonb) @@ plainto_tsquery('${TEXT_SEARCH_VECTOR_TYPE}', '${text}')`)
+        const numOfFields = fieldNames.length;
+        let rawQuery = '';
+        fieldNames.map((fn, i) => {
+            if (numOfFields !== i + 1) {
+                rawQuery += (`to_tsvector('${TEXT_SEARCH_VECTOR_TYPE}', ${fn}::text) ||`)
+            } else {
+                rawQuery += (`to_tsvector('${TEXT_SEARCH_VECTOR_TYPE}', ${fn}::text) @@ plainto_tsquery('${TEXT_SEARCH_VECTOR_TYPE}', '${text}')`)
+            }
+        })
+        query.whereRaw(rawQuery);
         if (selectionFunc) {
             query.select(selectedFields, selectionFunc);
         }

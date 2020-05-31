@@ -1,12 +1,10 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-// TODO: configure eslint: no-use-before-define
 import Knex = require('knex');
 type trx = Knex.Transaction<any, any>;
 
 import { db } from './db-connection';
 import { paginate } from './pagination';
 import { PaginationConfig } from '../../models/pagination-config';
-import { ConflictQueryParams } from 'src/conflict/models/conflict-query-params';
+import { ConflictQueryParams } from 'src/conflicts/models/conflict-query-params';
 
 export const getAllRecords = async (tableName: string, paginationConf: PaginationConfig, selectionFunc?: any, fields?: string[]) => {
   const selectedFields = setFields(fields);

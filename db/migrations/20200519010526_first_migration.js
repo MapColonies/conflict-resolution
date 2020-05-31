@@ -1,14 +1,7 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 const Knex = require('knex');
 
 const { onUpdateTrigger } = require('../../knexfile');
-
-const tableNames = {
-  conflict: 'conflict',
-  result: 'result' 
-}
-// FIXME: cannot find tableNames
-// const { tableNames } = require('../../src/services/postgres/table-names');
+const tableNames = require('../../src/global/services/postgres/migration/table-names');
 const {
   ON_UPDATE_TIMESTAMP_FUNCTION,
   DROP_ON_UPDATE_TIMESTAMP_FUNCTION,
@@ -18,8 +11,7 @@ const {
 const {
   addDefaultColumns,
   createReference,
-  rollbackDropReference,
-  rollbackDropIndex
+  rollbackDropReference
 } = require('../../src/global/services/postgres/migration/table-utils');
 
 /**
@@ -30,54 +22,58 @@ exports.up = async (knex) => {
   await knex.raw(ON_UPDATE_TIMESTAMP_FUNCTION);  
   await Promise.all([
     knex.schema
-      .createTable(tableNames.conflict, (table) => {
+      .createTable(tableNames.conflicts, (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
-        table.string('requesting_server').notNullable();
-        table.string('requested_server').notNullable();
-        table.jsonb('requesting_entity').notNullable();
-        table.jsonb('requested_entity').notNullable();
+        table.string('source_server').notNullable();
+        table.string('target_server').notNullable();
+        table.jsonb('source_entity').notNullable();
+        table.jsonb('target_entity').notNullable();
         table.string('description', 1000);
         table.boolean('has_resolved').defaultTo(false);
         table.datetime('resolved_at');
         table.specificType('location', 'geometry(point, 4326)');
-        createReference(table, tableNames.result, 'set null', true);
+        createReference(table, tableNames.results, 'set null', true);
         addDefaultColumns(table);
       })
-      .then(() => knex.raw(onUpdateTrigger(tableNames.conflict))),
+      .then(() => knex.raw(onUpdateTrigger(tableNames.conflicts))),
     knex.schema
-      .createTable(tableNames.result, (table) => {
+      .createTable(tableNames.results, (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('result_server').notNullable();
         table.jsonb('result_entity').notNullable();
         table.uuid('resolved_by_id');
         table.string('resolved_by');
-        createReference(table, tableNames.conflict, 'cascade', false);
+        createReference(table, tableNames.conflicts, 'cascade', false);
         addDefaultColumns(table);
       })
-      .then(() => knex.raw(onUpdateTrigger(tableNames.result))),
+      .then(() => knex.raw(onUpdateTrigger(tableNames.results))),
   ]);
-  await knex.raw(CREATE_INDEX(tableNames.conflict, 'requesting_entity', 'idx_conflict_requesting_entity_full_text'));
-  await knex.raw(CREATE_INDEX(tableNames.conflict, 'requested_entity', 'idx_conflict_requested_entity_full_text'));
+  await knex.raw(CREATE_INDEX(tableNames.conflicts, 'source_entity', 'idx_conflict_source_entity_full_text'));
+  await knex.raw(CREATE_INDEX(tableNames.conflicts, 'target_entity', 'idx_conflict_target_entity_full_text'));
 };
+
+// TODO: convert plural names to singular
 
 /**
  * @param {Knex} knex
  */
 exports.down = async (knex) => {
-  await knex.raw(DROP_INDEX('idx_conflict_requesting_entity_full_text'));
-  await knex.raw(DROP_INDEX('idx_conflict_requested_entity_full_text'));
+  await knex.raw(DROP_INDEX('idx_conflict_source_entity_full_text'));
+  await knex.raw(DROP_INDEX('idx_conflict_target_entity_full_text'));
   await rollbackDropReference(
     knex,
-    tableNames.conflict,
-    `${tableNames.result}_id`
+    tableNames.conflicts,
+    // `${tableNames.results}_id`
+    'result_id'
   );
   await rollbackDropReference(
     knex,
-    tableNames.result,
-    `${tableNames.conflict}_id`
+    tableNames.results,
+    // `${tableNames.conflicts}_id`
+    'conflict_id'
   );
   await Promise.all(
-    [tableNames.result, tableNames.conflict].map((tableName) =>
+    [tableNames.results, tableNames.conflicts].map((tableName) =>
       knex.schema.dropTableIfExists(tableName)
     )
   );

@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { Conflict } from "src/conflict/models/conflict";
+import { Conflict } from "src/conflicts/models/conflict";
 
 export class FullResult {
     @ApiProperty()
@@ -10,7 +10,7 @@ export class FullResult {
     result_server: string;
 
     @ApiProperty()
-    result_entity: string;
+    result_entity: object;
 
     @ApiPropertyOptional()
     resolved_by?: string;

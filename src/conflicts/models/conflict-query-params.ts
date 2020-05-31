@@ -5,8 +5,8 @@ import { setSRID, createGeometry } from '../../global/services/postgis/util'
 const minKeywordLength = 3;
 const keywordInFields = [
   'description',
-  'requesting_server',
-  'requested_server',
+  'source_server',
+  'target_server',
 ];
 
 export class ConflictQueryParams {

@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import { db } from '../global/services/postgres/db-connection';
 import { postgis } from '../global/services/postgis';
 import tableNames = require('../global/services/postgres/table-names');
@@ -10,8 +7,8 @@ import { FullResult } from './models/full-result';
 import { PaginationResult } from 'src/global/models/pagination-result';
 
 // TODO: should be used with nest-knex? move functions into a service?
-const baseQuery = db({ r: tableNames.result })
-  .join(tableNames.conflict, { 'r.conflict_id': 'conflict.id' })
+const baseQuery = db({ r: tableNames.results })
+  .join(tableNames.conflicts, { 'r.conflict_id': 'conflicts.id' })
   .select([
     '*',
     'r.created_at as r_created_at',
