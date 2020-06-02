@@ -31,7 +31,7 @@ export class Conflict {
     resolved_at?: Date;
 
     @ApiPropertyOptional()
-    result_id?: string;
+    resolution_id?: string;
 
     @ApiProperty()
     created_at: Date;

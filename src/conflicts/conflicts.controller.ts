@@ -9,9 +9,8 @@ import { PaginationResult } from '../global/models/pagination-result';
 import { ConflictDto } from './models/conflict-dto';
 import { ConflictQueryParams } from 'src/conflicts/models/conflict-query-params';
 import { PaginationConfig } from 'src/global/models/pagination-config';
-import { PaginationQueryDto } from 'src/global/models/pagination-query-dto';
 import { ConflictQueryDto } from 'src/conflicts/models/conflict-query-dto';
-import { ResolveDto } from 'src/results/models/resolve-dto';
+import { ResolveDto } from 'src/resolutions/models/resolve-dto';
 import { TextSearchDto } from '../global/models/text-search-dto';
 import { ResponseHelperService } from 'src/shared/response-helper.service';
 
@@ -21,17 +20,7 @@ export class ConflictsController {
     constructor(private responseHelper: ResponseHelperService, 
         private readonly conflictsService: ConflictsService) { }
 
-    @Get('all')
-    @ApiResponse({
-        status: 200,
-        type: PaginationResult
-    })
-    async getAllConflicts(@Query() query: PaginationQueryDto): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
-        const conflicts = await this.conflictsService.getAll(new PaginationConfig(query.page, query.limit));
-        return this.responseHelper.ok(conflicts);
-    }
-
-    @Get('query')
+    @Get()
     @ApiResponse({
         status: 200,
         type: PaginationResult
@@ -119,7 +108,7 @@ export class ConflictsController {
         return this.responseHelper.ok('Conflict deleted');
     }
 
-    @Post(':id/resolve')
+    @Post('resolve/:id')
     @ApiResponse({
         status: 200,
         type: Conflict
@@ -154,8 +143,8 @@ export class ConflictsController {
         }
         
         await this.conflictsService.resolve(conflict, {
-            result_server: winner.server,
-            result_entity: winner.entity,
+            resolution_server: winner.server,
+            resolution_entity: winner.entity,
             conflict_id: id,
             resolved_by: resolvedBy
         });

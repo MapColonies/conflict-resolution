@@ -5,7 +5,7 @@ import { postgis } from '../global/services/postgis'
 import tableNames = require('../global/services/postgres/table-names');
 import { PaginationConfig } from '../global/models/pagination-config';
 import { ConflictDto } from './models/conflict-dto';
-import { setSRID } from '../global/services/postgis/util'
+import { DEFAULT_SRID } from '../global/services/postgis/util'
 import { Conflict } from './models/conflict';
 import { PaginationResult } from 'src/global/models/pagination-result';
 import { queryConflicts } from './conflicts.queries';
@@ -60,16 +60,16 @@ export class ConflictsService {
         return await this.queryService.deleteRecord(tableNames.conflicts, id);
     }
 
-    async resolve(conflict: Conflict, result: {}): Promise<void> {
+    async resolve(conflict: Conflict, resolution: {}): Promise<void> {
         try {
             await this.knex.transaction(async (trx) => {
-                const createdResult = (
-                    await this.queryService.createRecord(tableNames.results, result, null, trx)
+                const createdResolution = (
+                    await this.queryService.createRecord(tableNames.resolutions, resolution, null, trx)
                 );
                 
                 conflict.has_resolved = true;
-                conflict.resolved_at = createdResult.created_at;
-                conflict.result_id = createdResult.id;
+                conflict.resolved_at = createdResolution.created_at;
+                conflict.resolution_id = createdResolution.id;
 
                 await this.queryService.updateRecord(
                     tableNames.conflicts,
@@ -98,7 +98,7 @@ export class ConflictsService {
 
     private parseLocation = (input: any, fieldName: string) => {
         const output = { ...input };
-        output[fieldName] = setSRID(postgis.geomFromGeoJSON(input[fieldName]));
+        output[fieldName] = postgis.setSRID(postgis.geomFromGeoJSON(input[fieldName]), DEFAULT_SRID);
         return output;
     }
 }

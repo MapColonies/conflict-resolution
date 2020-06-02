@@ -1,53 +1,53 @@
 import {Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectKnex, Knex } from 'nestjs-knex';
 
-import { getAllResults, getResultById } from './results.queries';
+import { getAllResolutions, getResolutionById } from './resolutions.queries';
 import { PaginationResult } from 'src/global/models/pagination-result';
 import { PaginationConfig } from 'src/global/models/pagination-config';
 import tableNames = require('../global/services/postgres/table-names');
-import { FullResult } from './models/full-result';
+import { FullResolution } from './models/full-resolution';
 import { QueryService } from 'src/shared/query.service';
 
 @Injectable()
-export class ResultsService {
+export class ResolutionsService {
     constructor(
         @InjectKnex() private readonly knex: Knex,
         private readonly queryService: QueryService
       ) {}
 
-    async getAll(paginationConf: PaginationConfig): Promise<PaginationResult<FullResult>> {
-        return await getAllResults(paginationConf);
+    async getAll(paginationConf: PaginationConfig): Promise<PaginationResult<FullResolution>> {
+        return await getAllResolutions(paginationConf);
     };
 
     async search(text: string, paginationConfig: PaginationConfig) {
-        return await this.queryService.fullTextSearch(tableNames.results,
-            ["result_entity"],
+        return await this.queryService.fullTextSearch(tableNames.resolutions,
+            ["resolution_entity"],
             text,
             paginationConfig
         );
     };
 
-    async getById(id: string): Promise<FullResult> {
-        return await getResultById(id);
+    async getById(id: string): Promise<FullResolution> {
+        return await getResolutionById(id);
     };
 
-    async delete(result: FullResult): Promise<void> {
+    async delete(resolution: FullResolution): Promise<void> {
         try {
-            // in transaction call for deletion of the result and update of the conflict
+            // in transaction call for deletion of the resolution and update of the conflict
             await this.knex.transaction(async (trx) => {
                 const isDeleted = await this.queryService.deleteRecord(
-                    tableNames.results,
-                    result.result_id,
+                    tableNames.resolutions,
+                    resolution.resolution_id,
                     trx
                 );
                 if (!isDeleted) {
-                    throw new InternalServerErrorException(null, 'Could not delete result, please try again.')
+                    throw new InternalServerErrorException(null, 'Could not delete resolution, please try again.')
                 }
 
-                // get result's conflict and update it
+                // get resolution's conflict and update it
                 const conflict = await this.queryService.getRecordById(
                     tableNames.conflicts,
-                    result.conflict.id,
+                    resolution.conflict.id,
                     null,
                     null,
                     trx

@@ -1,7 +1,7 @@
-export interface Result {
+export interface Resolution {
     id: string,
-    result_server: string,
-    result_entity: object,
+    resolution_server: string,
+    resolution_entity: object,
     conflict_id: string
     resolved_by?: string
     resolved_by_id?: string;

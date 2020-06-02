@@ -1,6 +1,6 @@
 import { postgis } from '../../global/services/postgis'
 import { unixToDate } from '../../util/times';
-import { setSRID, createGeometry } from '../../global/services/postgis/util'
+import { DEFAULT_SRID, createGeometry } from '../../global/services/postgis/util'
 
 const minKeywordLength = 3;
 const keywordInFields = [
@@ -48,7 +48,7 @@ export class ConflictQueryParams {
 
   buildQuery(query) {
     if (this.polygon) {
-      query.where(postgis.within(setSRID('location'), setSRID(this.polygon)));
+      query.where(postgis.within(postgis.setSRID('location', DEFAULT_SRID), postgis.setSRID(this.polygon, DEFAULT_SRID)));
     }
     if (this.hasResolved !== undefined) {
       query.where('has_resolved', this.hasResolved);

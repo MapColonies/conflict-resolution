@@ -32,21 +32,21 @@ exports.up = async (knex) => {
         table.boolean('has_resolved').defaultTo(false);
         table.datetime('resolved_at');
         table.specificType('location', 'geometry(point, 4326)');
-        createReference(table, tableNames.results, 'set null', true);
+        createReference(table, tableNames.resolutions, 'set null', true);
         addDefaultColumns(table);
       })
       .then(() => knex.raw(onUpdateTrigger(tableNames.conflicts))),
     knex.schema
-      .createTable(tableNames.results, (table) => {
+      .createTable(tableNames.resolutions, (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
-        table.string('result_server').notNullable();
-        table.jsonb('result_entity').notNullable();
+        table.string('resolution_server').notNullable();
+        table.jsonb('resolution_entity').notNullable();
         table.uuid('resolved_by_id');
         table.string('resolved_by');
         createReference(table, tableNames.conflicts, 'cascade', false);
         addDefaultColumns(table);
       })
-      .then(() => knex.raw(onUpdateTrigger(tableNames.results))),
+      .then(() => knex.raw(onUpdateTrigger(tableNames.resolutions))),
   ]);
   await knex.raw(CREATE_INDEX(tableNames.conflicts, 'source_entity', 'idx_conflict_source_entity_full_text'));
   await knex.raw(CREATE_INDEX(tableNames.conflicts, 'target_entity', 'idx_conflict_target_entity_full_text'));
@@ -63,17 +63,17 @@ exports.down = async (knex) => {
   await rollbackDropReference(
     knex,
     tableNames.conflicts,
-    // `${tableNames.results}_id`
-    'result_id'
+    // `${tableNames.resolutions}_id`
+    'resolution_id'
   );
   await rollbackDropReference(
     knex,
-    tableNames.results,
+    tableNames.resolutions,
     // `${tableNames.conflicts}_id`
     'conflict_id'
   );
   await Promise.all(
-    [tableNames.results, tableNames.conflicts].map((tableName) =>
+    [tableNames.resolutions, tableNames.conflicts].map((tableName) =>
       knex.schema.dropTableIfExists(tableName)
     )
   );

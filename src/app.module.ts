@@ -6,8 +6,8 @@ import { NODE_ENV } from './config/app-conflig';
 import knexConfig = require('../knexfile');
 import { ConflictsController } from './conflicts/conflicts.controller';
 import { ConflictsService } from './conflicts/conflicts.service';
-import { ResultsService } from './results/results.service';
-import { ResultsController } from './results/results.controller';
+import { ResolutionsService } from './resolutions/resolutions.service';
+import { ResolutionsController } from './resolutions/resolutions.controller';
 import { QueryService } from './shared/query.service';
 import { ResponseHelperService } from './shared/response-helper.service';
 
@@ -19,12 +19,12 @@ import { ResponseHelperService } from './shared/response-helper.service';
       }),
     }),
   ],
-  controllers: [ConflictsController, ResultsController],
+  controllers: [ConflictsController, ResolutionsController],
   providers: [
     {
       provide: APP_PIPE,
       useValue: new ValidationPipe({ transform: true }),
     },
-    ConflictsService, ResultsService, QueryService, ResponseHelperService],
+    ConflictsService, ResolutionsService, QueryService, ResponseHelperService],
 })
 export class AppModule { }

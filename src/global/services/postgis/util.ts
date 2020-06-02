@@ -1,14 +1,15 @@
+import * as Knex from 'knex';
+
 import { postgis } from '.';
 
-const defaultSRID = 4326;
+export interface ExtendedKnexRaw extends Knex.Raw {
+  as(alias: string): ExtendedKnexRaw
+}
 
-export const setSRID = (geometry, srid: number = defaultSRID) => {
-  return postgis.setSRID(geometry, srid);
-};
+export const DEFAULT_SRID = 4326;
 
-export const createGeometry = (coordinatesArray: number[][], geometryType: string) => {
-  return postgis.geomFromGeoJSON(`
+export const createGeometry = (coordinatesArray: number[][], geometryType: string): ExtendedKnexRaw =>
+  postgis.geomFromGeoJSON(`
     { "type": "${geometryType}",
     "coordinates": ${JSON.stringify([coordinatesArray])}
    }`);
-};

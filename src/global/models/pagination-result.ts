@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 
 import { Conflict } from '../../conflicts/models/conflict';
-import { FullResult } from 'src/results/models/full-result';
+import { FullResolution } from 'src/resolutions/models/full-resolution';
 
 export class PaginationResult<T> {
     @ApiProperty()
@@ -22,11 +22,11 @@ export class PaginationResult<T> {
     @ApiProperty({
         oneOf: [
             { $ref: getSchemaPath(Conflict) },
-            { $ref: getSchemaPath(FullResult) }
+            { $ref: getSchemaPath(FullResolution) }
         ],
-        type: [Conflict, FullResult]
+        type: [Conflict, FullResolution]
     })
-    data: [Conflict] | [FullResult]
+    data: [Conflict] | [FullResolution]
 
     @ApiPropertyOptional()
     from?: number;

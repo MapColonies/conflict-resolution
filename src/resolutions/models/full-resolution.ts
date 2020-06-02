@@ -2,15 +2,15 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { Conflict } from "src/conflicts/models/conflict";
 
-export class FullResult {
+export class FullResolution {
     @ApiProperty()
-    result_id: string;
+    resolution_id: string;
 
     @ApiProperty()
-    result_server: string;
+    resolution_server: string;
 
     @ApiProperty()
-    result_entity: object;
+    resolution_entity: object;
 
     @ApiPropertyOptional()
     resolved_by?: string;

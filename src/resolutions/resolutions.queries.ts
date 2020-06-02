@@ -3,11 +3,11 @@ import { postgis } from '../global/services/postgis';
 import tableNames = require('../global/services/postgres/table-names');
 import { paginate } from '../global/services/postgres/pagination';
 import { PaginationConfig } from 'src/global/models/pagination-config';
-import { FullResult } from './models/full-result';
+import { FullResolution } from './models/full-resolution';
 import { PaginationResult } from 'src/global/models/pagination-result';
 
 // TODO: should be used with nest-knex? move functions into a service?
-const baseQuery = db({ r: tableNames.results })
+const baseQuery = db({ r: tableNames.resolutions })
   .join(tableNames.conflicts, { 'r.conflict_id': 'conflicts.id' })
   .select([
     '*',
@@ -16,41 +16,41 @@ const baseQuery = db({ r: tableNames.results })
     postgis.asGeoJSON('location'),
   ]);
 
-export const getAllResults = async (paginationConf: PaginationConfig): Promise<PaginationResult<FullResult>> => {
+export const getAllResolutions = async (paginationConf: PaginationConfig): Promise<PaginationResult<FullResolution>> => {
   const query = baseQuery.clone();
   if (!paginationConf) {
-    return deconstructToConflictAndResult(await query);
+    return deconstructToConflictAndResolution(await query);
   }
   const paginationResult = await paginate(query, paginationConf);
-  paginationResult.data = deconstructToConflictAndResult(paginationResult.data);
+  paginationResult.data = deconstructToConflictAndResolution(paginationResult.data);
   return paginationResult;
 };
 
-export const getResultById = async (id: string): Promise<FullResult> => {
+export const getResolutionById = async (id: string): Promise<FullResolution> => {
   const query = baseQuery.clone();
-  const fullResults = await query.where('r.id', id);
-  return (deconstructToConflictAndResult(fullResults))[0];
+  const fullResolutions = await query.where('r.id', id);
+  return (deconstructToConflictAndResolution(fullResolutions))[0];
 };
 
 // TODO: build dynamic \ better way
-const deconstructToConflictAndResult = (fullResults) => {
-  return fullResults.map((fr) => {
+const deconstructToConflictAndResolution = (fullResolutions) => {
+  return fullResolutions.map((fr) => {
     // remove fields
-    const { conflict_id, deleted_at, ...conflictAndResult } = fr;
+    const { conflict_id, deleted_at, ...conflictAndResolution } = fr;
 
     const {
-      result_id,
-      result_server,
-      result_entity,
+      resolution_id,
+      resolution_server,
+      resolution_entity,
       r_created_at,
       r_updated_at,
       ...conflict
-    } = conflictAndResult;
+    } = conflictAndResolution;
 
     return {
-      result_id,
-      result_server,
-      result_entity,
+      resolution_id,
+      resolution_server,
+      resolution_entity,
       r_created_at,
       r_updated_at,
       conflict,
