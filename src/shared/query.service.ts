@@ -60,8 +60,12 @@ export class QueryService {
         return await this.callQuery(query, inTransaction);
     };
 
-    async createRecord(tableName: string, record: any, fields?: string[], inTransaction?: trx) {
-        const query = this.knex(tableName).insert(record).returning(this.setFields(fields));
+    async createRecord(tableName: string, record: any, selectionFunc?: any, fields?: string[], inTransaction?: trx) {
+        let selectedFields = this.setFields(fields);
+        if (selectionFunc) {
+            selectedFields = [...selectedFields, selectionFunc]
+        }        
+        const query = this.knex(tableName).insert(record).returning(selectedFields);
         return (await this.callQuery(query, inTransaction))[0];
     };
 
@@ -69,13 +73,18 @@ export class QueryService {
         tableName: string,
         id: string,
         updatedRecord: any,
+        selectionFunc?: any,
         fields?: string[],
         inTransaction?: trx
     ) {
+        let selectedFields = this.setFields(fields);
+        if (selectionFunc) {
+            selectedFields = [...selectedFields, selectionFunc]
+        } 
         const query = this.knex(tableName)
             .where('id', id)
             .update(updatedRecord)
-            .returning(this.setFields(fields));
+            .returning(selectedFields);
         return (await this.callQuery(query, inTransaction))[0];
     };
 
@@ -92,7 +101,7 @@ export class QueryService {
         return await this.callQuery(query, inTransaction);
     }
 
-    private setFields = (fields: string[]) => {
+    private setFields = (fields: string[]): string | string[] => {
         if (!fields) {
             return '*';
         }

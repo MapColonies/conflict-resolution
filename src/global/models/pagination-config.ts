@@ -1,6 +1,6 @@
 import { PaginationResult } from './pagination-result';
 
-const defaultPerPage = 10;
+export const defaultPerPage = 10;
 export const minPerPage = 1;
 export const maxPerPage = 100
 

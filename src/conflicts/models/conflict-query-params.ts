@@ -1,6 +1,7 @@
 import { postgis } from '../../global/services/postgis'
 import { unixToDate } from '../../util/times';
-import { DEFAULT_SRID, createGeometry } from '../../global/services/postgis/util'
+import { DEFAULT_SRID, createGeometryFromGeojson } from '../../global/services/postgis/util'
+import { CustomGeoJson } from 'src/global/models/custom-geojson';
 
 const minKeywordLength = 3;
 const keywordInFields = [
@@ -12,31 +13,33 @@ const keywordInFields = [
 export class ConflictQueryParams {
   public from: Date;
   public to: Date;
-  public polygon: any;
+  public geojson: any;
   public keywords: string[] = []
 
-  constructor(from?: number, to?: number, coordinates?: string, keywords?: string, public hasResolved?: boolean) {
+  constructor(from?: number, to?: number, geojson?: CustomGeoJson, keywords?: string[], public hasResolved?: boolean) {
     this.from = unixToDate(from);
     this.to = unixToDate(to);
     if (keywords) {
-      // remove spaces
-      keywords = keywords.replace(/\s+/g, '')
-      // split to array of words
-      let keywordsArray = keywords.split(',');
       // filter by word length
-      keywordsArray = keywordsArray.filter(k =>
+      keywords = keywords.filter(k =>
         k.length >= minKeywordLength
       );
       // store unique values
-      this.keywords = [...new Set(keywordsArray)];
+      this.keywords = [...new Set(keywords)];
     }
-    if (coordinates) {
-      const coordinatesArray = coordinates
-        .split(',')
-        .map((coordinate) => coordinate.split('@'))
-        .map((c) => c.map((cc) => parseFloat(cc)));
-      this.polygon = createGeometry(coordinatesArray, 'Polygon');
-    }
+    
+    // if (coordinates) {
+    //   const coordinatesArray = coordinates
+    //     .split(',')
+    //     .map((coordinate) => coordinate.split('@'))
+    //     .map((c) => c.map((cc) => parseFloat(cc)));
+    //   this.polygon = createGeometry(coordinatesArray, 'Polygon');
+    // }
+
+    // TODO: validate geojson & test
+    if (geojson) {
+      this.geojson = createGeometryFromGeojson(geojson);
+    }   
   }
 
   isValid(): boolean {
@@ -47,8 +50,11 @@ export class ConflictQueryParams {
   }
 
   buildQuery(query) {
-    if (this.polygon) {
-      query.where(postgis.within(postgis.setSRID('location', DEFAULT_SRID), postgis.setSRID(this.polygon, DEFAULT_SRID)));
+    if (this.geojson) {
+      const geometryA = postgis.setSRID('location', DEFAULT_SRID);
+      const geometryB = postgis.setSRID(this.geojson, DEFAULT_SRID);
+      query.where(postgis.within(geometryA, geometryB));
+      query.orWhere(postgis.intersects(geometryA, geometryB));
     }
     if (this.hasResolved !== undefined) {
       query.where('has_resolved', this.hasResolved);

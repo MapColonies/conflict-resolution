@@ -1,12 +1,12 @@
 const Knex = require('knex');
 
-const { onUpdateTrigger } = require('../../knexfile');
 const tableNames = require('../../src/global/services/postgres/migration/table-names');
 const {
   ON_UPDATE_TIMESTAMP_FUNCTION,
   DROP_ON_UPDATE_TIMESTAMP_FUNCTION,
   CREATE_INDEX,
-  DROP_INDEX
+  DROP_INDEX,
+  ON_UPDATE_TRIGGER
 } = require('../../src/global/services/postgres/migration/custom-functions');
 const {
   addDefaultColumns,
@@ -31,11 +31,11 @@ exports.up = async (knex) => {
         table.string('description', 1000);
         table.boolean('has_resolved').defaultTo(false);
         table.datetime('resolved_at');
-        table.specificType('location', 'geometry(point, 4326)');
+        table.specificType('location', 'geometry');// table.specificType('location', 'geometry(point, 4326)');
         createReference(table, tableNames.resolutions, 'set null', true);
         addDefaultColumns(table);
       })
-      .then(() => knex.raw(onUpdateTrigger(tableNames.conflicts))),
+      .then(() => knex.raw(ON_UPDATE_TRIGGER(tableNames.conflicts))),
     knex.schema
       .createTable(tableNames.resolutions, (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
@@ -46,7 +46,7 @@ exports.up = async (knex) => {
         createReference(table, tableNames.conflicts, 'cascade', false);
         addDefaultColumns(table);
       })
-      .then(() => knex.raw(onUpdateTrigger(tableNames.resolutions))),
+      .then(() => knex.raw(ON_UPDATE_TRIGGER(tableNames.resolutions))),
   ]);
   await knex.raw(CREATE_INDEX(tableNames.conflicts, 'source_entity', 'idx_conflict_source_entity_full_text'));
   await knex.raw(CREATE_INDEX(tableNames.conflicts, 'target_entity', 'idx_conflict_target_entity_full_text'));

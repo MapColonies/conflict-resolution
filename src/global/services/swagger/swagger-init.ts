@@ -1,7 +1,7 @@
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { INestApplication } from '@nestjs/common';
 
-import { APP_VERSION } from '../../../config/app-conflig';
+import { APP_VERSION } from '../../../config/app-config';
 
 const options = new DocumentBuilder()
     .setTitle('Conflict Resolution')

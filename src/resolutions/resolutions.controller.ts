@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Param, NotFoundException, Delete, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Query, Param, NotFoundException, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 
 import { ResolutionsService } from './resolutions.service';
@@ -27,7 +27,7 @@ export class ResolutionsController {
         return this.responseHelper.ok(resolutions);
     }
 
-    @Get('search')
+    @Post('search')
     @ApiResponse({
         status: 200,
         type: PaginationResult

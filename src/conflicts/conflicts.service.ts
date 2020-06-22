@@ -11,6 +11,7 @@ import { PaginationResult } from 'src/global/models/pagination-result';
 import { queryConflicts } from './conflicts.queries';
 import { ConflictQueryParams } from 'src/conflicts/models/conflict-query-params';
 import { QueryService } from 'src/shared/query.service';
+import { textToGeojson } from 'src/util';
 
 @Injectable()
 export class ConflictsService {
@@ -20,40 +21,58 @@ export class ConflictsService {
     ) { }
 
     async getAll(paginationConfig: PaginationConfig): Promise<PaginationResult<Conflict>> {
-        return await this.queryService.getAllRecords(tableNames.conflicts,
+        const res = await this.queryService.getAllRecords(tableNames.conflicts,
             paginationConfig,
             postgis.asGeoJSON('location')
         );
+        if (res?.data) {
+            this.parseConflictsLocationsToGeojson(res.data);
+        }
+        return res;
     };
 
     async getById(id: string, asGeojson = true): Promise<Conflict> {
-        return await this.queryService.getRecordById(tableNames.conflicts,
+        const data = await this.queryService.getRecordById(tableNames.conflicts,
             id,
             asGeojson ? postgis.asGeoJSON('location') : null)
+        if (asGeojson) {
+            this.parseConflictLocationToGeojson(data)
+        }
+        return data;
     };
 
     async search(text: string, paginationConfig: PaginationConfig) {
-        return await this.queryService.fullTextSearch(tableNames.conflicts,
+        const res = await this.queryService.fullTextSearch(tableNames.conflicts,
             ["target_entity", "source_entity"],
             text,
             paginationConfig,
             postgis.asGeoJSON('location')
         );
+        if (res?.data) {
+            this.parseConflictsLocationsToGeojson(res.data);
+        }
+        return res;
     };
     
     async create(conflictDto: ConflictDto): Promise<Conflict> {
-        return await this.queryService.createRecord(
+        const res = await this.queryService.createRecord(
             tableNames.conflicts,
-            this.parseLocation(conflictDto, 'location')
+            this.parseLocation(conflictDto, 'location'), 
+            postgis.asGeoJSON('location')
         );
+        this.parseConflictLocationToGeojson(res)
+        return res;
     }
 
     async update(id: string, conflictDto: ConflictDto): Promise<Conflict> {
-        return await this.queryService.updateRecord(
+        const res = await this.queryService.updateRecord(
             tableNames.conflicts,
             id,
-            this.parseLocation(conflictDto, 'location')
+            this.parseLocation(conflictDto, 'location'),
+            postgis.asGeoJSON('location')
         );
+        this.parseConflictLocationToGeojson(res)
+        return res;
     }
 
     async delete(id: string) {
@@ -64,7 +83,7 @@ export class ConflictsService {
         try {
             await this.knex.transaction(async (trx) => {
                 const createdResolution = (
-                    await this.queryService.createRecord(tableNames.resolutions, resolution, null, trx)
+                    await this.queryService.createRecord(tableNames.resolutions, resolution, null, null, trx)
                 );
                 
                 conflict.has_resolved = true;
@@ -75,6 +94,7 @@ export class ConflictsService {
                     tableNames.conflicts,
                     conflict.id,
                     conflict,
+                    null,
                     null,
                     trx
                 );
@@ -88,17 +108,29 @@ export class ConflictsService {
         if (!conflictQueryParams.isValid()) {
             throw new BadRequestException(null, 'Query is invalid.')
         }
-        return await queryConflicts(
+        const res = await queryConflicts(
             this.knex,
             conflictQueryParams,
             paginationConfig,
             postgis.asGeoJSON('location')
         );
+        if (res?.data) {
+            this.parseConflictsLocationsToGeojson(res.data);
+        }
+        return res;
     }
 
     private parseLocation = (input: any, fieldName: string) => {
         const output = { ...input };
         output[fieldName] = postgis.setSRID(postgis.geomFromGeoJSON(input[fieldName]), DEFAULT_SRID);
         return output;
+    }
+
+    private parseConflictsLocationsToGeojson = (data: Conflict[]) => {
+        data?.map((conflict: Conflict) => this.parseConflictLocationToGeojson(conflict))
+    }
+
+    private parseConflictLocationToGeojson = (conflict: Conflict) => {
+        conflict.location = textToGeojson(conflict.location)
     }
 }

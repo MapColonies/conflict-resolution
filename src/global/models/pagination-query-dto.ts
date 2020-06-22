@@ -2,18 +2,18 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsInt, IsOptional, IsPositive, Min, Max } from 'class-validator';
 import { Type } from "class-transformer";
 
-import { maxPerPage, minPerPage } from './pagination-config';
+import { maxPerPage, minPerPage, defaultPerPage } from './pagination-config';
 
 export class PaginationQueryDto {
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ default: 1 })
     @IsOptional()
     @IsInt()
     @IsPositive()
     @Type(() => Number)
     page?: number;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ default: defaultPerPage })
     @IsOptional()
     @IsInt()
     @Min(minPerPage)

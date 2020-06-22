@@ -8,6 +8,13 @@ exports.ON_UPDATE_TIMESTAMP_FUNCTION = `
 $$ language 'plpgsql';
 `;
 
+exports.ON_UPDATE_TRIGGER = table => `
+CREATE TRIGGER ${table}_updated_at
+BEFORE UPDATE ON ${table}
+FOR EACH ROW
+EXECUTE PROCEDURE on_update_timestamp();
+`
+
 const TEXT_SEARCH_VECTOR_TYPE = 'English';
 exports.TEXT_SEARCH_VECTOR_TYPE = TEXT_SEARCH_VECTOR_TYPE;
 

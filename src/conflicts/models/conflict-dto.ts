@@ -2,7 +2,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsObject, IsNotEmpty, ValidateNested } from 'class-validator';
 import { Type } from "class-transformer";
 
-import { Location } from '../../global/models/location';
+import { CustomGeoJson } from '../../global/models/custom-geojson'
+import { OsmchangeElement } from 'src/global/models/osm/osmchange-element';
 
 export class ConflictDto {
     @ApiProperty()
@@ -17,39 +18,26 @@ export class ConflictDto {
     @Type(() => String)
     target_server: string;
 
-    @ApiProperty()
+    @ApiProperty({ type: () => OsmchangeElement })
     @IsObject()
-    @IsNotEmpty()
-    @Type(() => Object)
-    source_entity: object;
+    @ValidateNested()
+    @Type(() => OsmchangeElement)
+    source_entity: OsmchangeElement;
 
-    @ApiProperty()
+    @ApiProperty({ type: () => OsmchangeElement })
     @IsObject()
-    @IsNotEmpty()
-    @Type(() => Object)
-    target_entity: object;
+    @ValidateNested()
+    @Type(() => OsmchangeElement)
+    target_entity: OsmchangeElement;
 
     @ApiPropertyOptional()
     @IsString()
     @Type(() => String)
     description?: string;
 
-    @ApiProperty({ type: () => Location })
+    @ApiProperty({ type: () => CustomGeoJson })
     @IsObject()
     @ValidateNested()
-    @Type(() => Location)
-    location: Location;
-
-    // import { Raw, QueryBuilder } from "knex";
-
-    // location: string |
-    // Raw<any> |
-    // QueryBuilder<any, any> |
-    // GeoJSON.Point |
-    // GeoJSON.MultiPoint |
-    // GeoJSON.LineString |
-    // GeoJSON.MultiLineString |
-    // GeoJSON.Polygon |
-    // GeoJSON.MultiPolygon |
-    // GeoJSON.GeometryCollection;
+    @Type(() => CustomGeoJson)
+    location: CustomGeoJson;
 }

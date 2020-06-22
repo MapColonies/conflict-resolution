@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 
-import { APP_PORT} from './config/app-conflig';
+import { APP_PORT} from './config/app-config';
 import { swaggerInitialize } from './global/services/swagger/swagger-init';
 import { AppModule } from './app.module';
 

@@ -1,6 +1,6 @@
 import { Controller, Get, Query, Param, NotFoundException, Post, Body, Put, Delete, HttpStatus, 
-     InternalServerErrorException, BadRequestException, ParseUUIDPipe } from '@nestjs/common';
-import { ApiTags, ApiResponse } from '@nestjs/swagger';
+     InternalServerErrorException, BadRequestException, ParseUUIDPipe, UsePipes } from '@nestjs/common';
+import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
 
 import { ApiHttpResponse } from '../global/models/common/api-http-response';
 import { ConflictsService } from './conflicts.service';
@@ -13,6 +13,7 @@ import { ConflictQueryDto } from 'src/conflicts/models/conflict-query-dto';
 import { ResolveDto } from 'src/resolutions/models/resolve-dto';
 import { TextSearchDto } from '../global/models/text-search-dto';
 import { ResponseHelperService } from 'src/shared/response-helper.service';
+import { GeojsonValidationPipe } from 'src/shared/geojson-validation.pipe';
 
 @ApiTags('conflicts')
 @Controller('conflicts')
@@ -20,18 +21,22 @@ export class ConflictsController {
     constructor(private responseHelper: ResponseHelperService, 
         private readonly conflictsService: ConflictsService) { }
 
-    @Get()
+    @Post()
+    @ApiBody({
+        required: false,
+        type: ConflictQueryDto
+    })
     @ApiResponse({
         status: 200,
         type: PaginationResult
     })
     @ApiResponse({ status: 400, description: 'Query is invalid.'})
-    async searchConflicts(@Query() query: ConflictQueryDto): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
-        const { page, limit, from, to, coordinates, keywords, resolved } = query;
+    async queryConflicts(@Body(new GeojsonValidationPipe('geojson')) body?: ConflictQueryDto): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
+        const { page, limit, from, to, geojson, keywords, resolved } = body;
         const conflictQueryParams = new ConflictQueryParams(
             from,
             to,
-            coordinates,
+            geojson,
             keywords,
             resolved
         );
@@ -42,12 +47,12 @@ export class ConflictsController {
         return this.responseHelper.ok(result);
     }
 
-    @Get('search')
+    @Post('search')
     @ApiResponse({
         status: 200,
         type: PaginationResult
     })
-    async filterConflicts(@Query() query: TextSearchDto): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
+    async searchConflicts(@Query() query: TextSearchDto): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
         const result = await this.conflictsService.search(query.text, new PaginationConfig(query.page, query.limit));
         return this.responseHelper.ok(result);
     }
@@ -66,12 +71,12 @@ export class ConflictsController {
         return this.responseHelper.ok(conflict);
     }
 
-    @Post()
+    @Post('create')
     @ApiResponse({
         status: 201,
         type: Conflict
     })
-    async createConflict(@Body() conflictDto: ConflictDto): Promise<ApiHttpResponse<Conflict>> {
+    async createConflict(@Body(new GeojsonValidationPipe('location')) conflictDto: ConflictDto): Promise<ApiHttpResponse<Conflict>> {
         const createdConflict = await this.conflictsService.create(conflictDto);
         return this.responseHelper.ok(createdConflict, HttpStatus.CREATED);
     }
@@ -82,7 +87,7 @@ export class ConflictsController {
         type: Conflict
     })
     @ApiResponse({ status: 404, description: 'Not found.' })
-    async updateConflict(@Param('id', ParseUUIDPipe) id: string, @Body() conflictDto: ConflictDto): Promise<ApiHttpResponse<Conflict>> {
+    async updateConflict(@Param('id', ParseUUIDPipe) id: string, @Body(new GeojsonValidationPipe('location')) conflictDto: ConflictDto): Promise<ApiHttpResponse<Conflict>> {
         const updatedConflict = await this.conflictsService.update(id, conflictDto);
         if (!updatedConflict) {
             throw new NotFoundException();

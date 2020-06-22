@@ -2,7 +2,7 @@ import { Module, ValidationPipe } from '@nestjs/common';
 import { KnexModule } from 'nestjs-knex';
 import { APP_PIPE } from '@nestjs/core';
 
-import { NODE_ENV } from './config/app-conflig';
+import { NODE_ENV } from './config/app-config';
 import knexConfig = require('../knexfile');
 import { ConflictsController } from './conflicts/conflicts.controller';
 import { ConflictsService } from './conflicts/conflicts.service';

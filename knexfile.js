@@ -1,28 +1,18 @@
-require('dotenv').config();
+const { postgresConfig } = require('./src/config/postgres-config')
+
+// FIXME: host should be 'posgis'(docker container name) while queries and 'localhost' while migations and seeds
 
 module.exports = {
   development: {
     client: 'pg',
-    connection: {
-      host: process.env.APP_HOST,
-      database: process.env.POSTGRES_DB,
-      user: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      port: +process.env.POSTGRES_PORT
-    },
+    connection: postgresConfig,
     migrations: {
       directory: './db/migrations',
     },
     seeds: {
       directory: './db/seeds',
-    },
-  },
-  onUpdateTrigger: table => `
-    CREATE TRIGGER ${table}_updated_at
-    BEFORE UPDATE ON ${table}
-    FOR EACH ROW
-    EXECUTE PROCEDURE on_update_timestamp();
-    `
+    }
+  }
 };
 
 /*

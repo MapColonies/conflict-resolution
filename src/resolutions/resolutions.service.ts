@@ -61,6 +61,7 @@ export class ResolutionsService {
                     conflict.id,
                     conflict,
                     null,
+                    null,
                     trx
                 );
             });

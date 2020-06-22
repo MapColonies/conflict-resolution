@@ -1,6 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { GeoJSON } from "geojson";
 
-import { Location } from '../../global/models/location';
+import { OsmchangeElement } from 'src/global/models/osm/osmchange-element';
+import { CustomGeoJson } from 'src/global/models/custom-geojson';
 
 export class Conflict {
     @ApiProperty()
@@ -12,17 +14,17 @@ export class Conflict {
     @ApiProperty()
     target_server: string;
 
-    @ApiProperty()
-    source_entity: object;
+    @ApiProperty({ type: () => OsmchangeElement })
+    source_entity: OsmchangeElement;
 
-    @ApiProperty()
-    target_entity: object;
+    @ApiProperty({ type: () => OsmchangeElement })
+    target_entity: OsmchangeElement;
 
     @ApiProperty()
     description: string;
 
-    @ApiProperty({ type: () => Location })
-    location?: Location;
+    @ApiProperty({ type: () => CustomGeoJson })
+    location?: GeoJSON | string;
 
     @ApiProperty()
     has_resolved: boolean;
@@ -42,4 +44,3 @@ export class Conflict {
     @ApiPropertyOptional()
     deleted_at?: Date;
 }
-
