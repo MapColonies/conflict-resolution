@@ -3,12 +3,13 @@ import { IsString, MinLength, MaxLength } from 'class-validator';
 import { Type } from "class-transformer";
 
 import { PaginationQueryDto } from './pagination-query-dto';
+import { minSearchLength, maxSearchLength } from '../constants';
 
 export class TextSearchDto extends PartialType(PaginationQueryDto){
     @ApiPropertyOptional({ type: String })
     @IsString()
-    @MinLength(3)
-    @MaxLength(100)
+    @MinLength(minSearchLength)
+    @MaxLength(maxSearchLength)
     @Type(() => String)
     text: string;
 }

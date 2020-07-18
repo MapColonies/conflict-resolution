@@ -3,6 +3,7 @@ import { GeoJSON } from "geojson";
 
 import { OsmchangeElement } from 'src/global/models/osm/osmchange-element';
 import { CustomGeoJson } from 'src/global/models/custom-geojson';
+import { OsmChangeType } from '../../global/models/osm/osm-change-type';
 
 export class Conflict {
     @ApiProperty()
@@ -19,6 +20,12 @@ export class Conflict {
 
     @ApiProperty({ type: () => OsmchangeElement })
     target_entity: OsmchangeElement;
+
+    @ApiProperty({ enum: OsmChangeType, enumName: 'OsmChangeType' })
+    source_change_type: OsmChangeType;
+
+    @ApiProperty({ enum: OsmChangeType, enumName: 'OsmChangeType' })
+    target_change_type: OsmChangeType;
 
     @ApiProperty()
     description: string;

@@ -12,10 +12,12 @@ export class ApiHttpError {
 export class ApiHttpResponse<T = {}> {
     constructor(success = true,
         data: T,
+        statusCode?: HttpStatus,
         error?: ApiHttpError
     ) {
         this.success = success;
         this.data = data;
+        this.statusCode = statusCode;
         this.error = error;
     }
 
@@ -27,4 +29,7 @@ export class ApiHttpResponse<T = {}> {
 
     @ApiPropertyOptional({ type: () => ApiHttpError })
     error: ApiHttpError | {};
+
+    @ApiProperty()
+    statusCode: HttpStatus;
 }

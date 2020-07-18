@@ -28,6 +28,8 @@ exports.up = async (knex) => {
         table.string('target_server').notNullable();
         table.jsonb('source_entity').notNullable();
         table.jsonb('target_entity').notNullable();
+        table.string('source_change_type').notNullable();
+        table.string('target_change_type').notNullable();
         table.string('description', 1000);
         table.boolean('has_resolved').defaultTo(false);
         table.datetime('resolved_at');

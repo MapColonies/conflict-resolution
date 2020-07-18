@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, Param, NotFoundException, Delete, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Query, Param, NotFoundException, Delete, ParseUUIDPipe, HttpStatus, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 
 import { ResolutionsService } from './resolutions.service';
@@ -9,6 +9,9 @@ import { PaginationConfig } from 'src/global/models/pagination-config';
 import { TextSearchDto } from 'src/global/models/text-search-dto';
 import { ResponseHelperService } from 'src/shared/response-helper.service';
 import { ApiHttpResponse } from 'src/global/models/common/api-http-response';
+import { OrderByOptions } from 'src/global/models/order-by-options';
+import { OrderByValidationPipe } from 'src/shared/order-by-validation.pipe';
+import tableNames = require('../global/services/postgres/table-names');
 
 @ApiTags('resolutions')
 @Controller('resolutions')
@@ -19,50 +22,51 @@ export class ResolutionsController {
     // FIXME: example consists PaginationResult<Conflict>
     @Get()
     @ApiResponse({
-        status: 200,
+        status: HttpStatus.OK,
         type: PaginationResult
     })
-    async getAllResolutions(@Query() query: PaginationQueryDto): Promise<ApiHttpResponse<PaginationResult<FullResolution>>> {
-        const resolutions = await this.resolutionsService.getAll(new PaginationConfig(query.page, query.limit));
-        return this.responseHelper.ok(resolutions);
+    async getAllResolutions(@Query() query: PaginationQueryDto, @Query(new OrderByValidationPipe(tableNames.resolutions)) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<FullResolution>>> {
+        const resolutions = await this.resolutionsService.getAll(new PaginationConfig(query.page, query.limit), orderByOptions);
+        return this.responseHelper.success(resolutions);
     }
 
     @Post('search')
+    @HttpCode(HttpStatus.OK)
     @ApiResponse({
-        status: 200,
+        status: HttpStatus.OK,
         type: PaginationResult
     })
-    async searchResolutions(@Query() query: TextSearchDto): Promise<ApiHttpResponse<PaginationResult<FullResolution>>> {
-        const resolutions = await this.resolutionsService.search(query.text, new PaginationConfig(query.page, query.limit));
-        return this.responseHelper.ok(resolutions);
+    async searchResolutions(@Query() query: TextSearchDto, @Query(new OrderByValidationPipe(tableNames.resolutions)) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<FullResolution>>> {
+        const resolutions = await this.resolutionsService.search(query.text, new PaginationConfig(query.page, query.limit), orderByOptions);
+        return this.responseHelper.success(resolutions);
     }
 
     @Get(':id')
     @ApiResponse({
-        status: 200,
+        status: HttpStatus.OK,
         type: FullResolution
     })
-    @ApiResponse({ status: 404, description: 'Not found.' })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found.' })
     async getResolutionById(@Param('id', ParseUUIDPipe) id: string): Promise<ApiHttpResponse<FullResolution>> {
         const resolution = await this.resolutionsService.getById(id);
         if (!resolution) {
             throw new NotFoundException(null, 'Resolution could not be found.');
         }
-        return this.responseHelper.ok(resolution);
+        return this.responseHelper.success(resolution);
     }
 
     @Delete(':id')
     @ApiResponse({
-        status: 200,
+        status: HttpStatus.OK,
         type: ApiHttpResponse
     })
-    @ApiResponse({ status: 404, description: 'Not found.' })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found.' })
     async deleteResolution(@Param('id', ParseUUIDPipe) id: string): Promise<ApiHttpResponse> {
         const exists = await this.resolutionsService.getById(id);
         if (!exists) {
             throw new NotFoundException();
         }
         await this.resolutionsService.delete(exists);
-        return this.responseHelper.ok('Conflict resolution deleted.');
+        return this.responseHelper.success('Conflict resolution deleted.');
     }
 }

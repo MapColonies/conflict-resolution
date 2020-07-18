@@ -6,15 +6,14 @@ import * as HttpStatusCodes from 'http-status-codes';
 export class ResponseHelperService {
 
     createResponse<T = {}>({ success, data, statusCode, message }: { success: boolean, message?: string, statusCode?: HttpStatus, data?: T }) {
-        const res = new ApiHttpResponse<T>(success, data);
+        const res = new ApiHttpResponse<T>(success, data, statusCode);
         if (!success) {
             res.error = this.createError(statusCode, message);
         }
-
         return res;
     }
 
-    ok<T>(data?: T, statusCode = HttpStatus.OK): ApiHttpResponse<T> {
+    success<T>(data?: T, statusCode = HttpStatus.OK): ApiHttpResponse<T> {
         return this.createResponse<T>({ success: true, data, statusCode })
     }
 

@@ -1,7 +1,6 @@
 import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from '@nestjs/common';
-import gjv = require('geojson-validation');
-
 import { CustomGeoJson } from 'src/global/models/custom-geojson';
+import { validateGeojson } from '../util';
 
 @Injectable()
 export class GeojsonValidationPipe implements PipeTransform {
@@ -13,9 +12,13 @@ export class GeojsonValidationPipe implements PipeTransform {
             validate = value?.[this.fieldName];
         }
         if (validate instanceof CustomGeoJson) {
-            // TODO: test library
-            if (!gjv.valid(validate.parse())) {
-                throw new BadRequestException('Invalid GeoJSON.');
+            // errors === [] when valid
+            const errors = validateGeojson(validate.parse(), true);
+            if (!errors) {
+                throw new BadRequestException(`Invalid GeoJSON.`);
+            }
+            if (errors?.length > 0) {
+                throw new BadRequestException(`Invalid GeoJSON. ${errors}`);
             }
         }
         return value;

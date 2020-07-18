@@ -1,11 +1,6 @@
-import * as Knex from 'knex';
-
 import { postgis } from '.';
 import { CustomGeoJson } from 'src/global/models/custom-geojson';
-
-export interface ExtendedKnexRaw extends Knex.Raw {
-  as(alias: string): ExtendedKnexRaw
-}
+import { ExtendedKnexRaw } from '../postgres/knex-types';
 
 export const DEFAULT_SRID = 4326;
 

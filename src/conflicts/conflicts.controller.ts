@@ -1,5 +1,7 @@
-import { Controller, Get, Query, Param, NotFoundException, Post, Body, Put, Delete, HttpStatus, 
-     InternalServerErrorException, BadRequestException, ParseUUIDPipe, UsePipes } from '@nestjs/common';
+import {
+    Controller, Get, Query, Param, NotFoundException, Post, Body, Put, Delete, HttpStatus,
+    InternalServerErrorException, BadRequestException, ParseUUIDPipe, UsePipes, HttpCode, Res, Type
+} from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
 
 import { ApiHttpResponse } from '../global/models/common/api-http-response';
@@ -14,24 +16,32 @@ import { ResolveDto } from 'src/resolutions/models/resolve-dto';
 import { TextSearchDto } from '../global/models/text-search-dto';
 import { ResponseHelperService } from 'src/shared/response-helper.service';
 import { GeojsonValidationPipe } from 'src/shared/geojson-validation.pipe';
+import { OrderByOptions } from 'src/global/models/order-by-options';
+import { OrderByValidationPipe } from 'src/shared/order-by-validation.pipe';
+import tableNames = require('../global/services/postgres/table-names');
 
 @ApiTags('conflicts')
 @Controller('conflicts')
 export class ConflictsController {
-    constructor(private responseHelper: ResponseHelperService, 
+    constructor(private responseHelper: ResponseHelperService,
         private readonly conflictsService: ConflictsService) { }
 
     @Post()
+    @HttpCode(HttpStatus.OK)
     @ApiBody({
         required: false,
         type: ConflictQueryDto
     })
     @ApiResponse({
-        status: 200,
+        status: HttpStatus.OK,
         type: PaginationResult
     })
-    @ApiResponse({ status: 400, description: 'Query is invalid.'})
-    async queryConflicts(@Body(new GeojsonValidationPipe('geojson')) body?: ConflictQueryDto): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
+    @ApiResponse({
+        status: HttpStatus.BAD_REQUEST,
+        description: 'Query is invalid.'
+    })
+    async queryConflicts(@Body(new GeojsonValidationPipe('geojson')) body?: ConflictQueryDto,
+        @Query(new OrderByValidationPipe(tableNames.conflicts)) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
         const { page, limit, from, to, geojson, keywords, resolved } = body;
         const conflictQueryParams = new ConflictQueryParams(
             from,
@@ -42,65 +52,68 @@ export class ConflictsController {
         );
         const result = await this.conflictsService.query(
             conflictQueryParams,
-            new PaginationConfig(page, limit)
+            new PaginationConfig(page, limit),
+            orderByOptions
         );
-        return this.responseHelper.ok(result);
+        return this.responseHelper.success(result);
     }
 
     @Post('search')
+    @HttpCode(HttpStatus.OK)
     @ApiResponse({
-        status: 200,
+        status: HttpStatus.OK,
         type: PaginationResult
     })
-    async searchConflicts(@Query() query: TextSearchDto): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
-        const result = await this.conflictsService.search(query.text, new PaginationConfig(query.page, query.limit));
-        return this.responseHelper.ok(result);
+    // TODO: should create type for TextSearchDto + OrderByOptions?
+    async searchConflicts(@Query() query: TextSearchDto, @Query(new OrderByValidationPipe(tableNames.conflicts)) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
+        const result = await this.conflictsService.search(query.text, new PaginationConfig(query.page, query.limit), orderByOptions);
+        return this.responseHelper.success(result);
     }
 
     @Get(':id')
     @ApiResponse({
-        status: 200,
+        status: HttpStatus.OK,
         type: Conflict
     })
-    @ApiResponse({ status: 404, description: 'Not found.'})
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found.' })
     async getConflictById(@Param('id', ParseUUIDPipe) id: string): Promise<ApiHttpResponse<Conflict>> {
         const conflict = await this.conflictsService.getById(id);
         if (!conflict) {
             throw new NotFoundException(null, 'Conflict could not be found.');
         }
-        return this.responseHelper.ok(conflict);
+        return this.responseHelper.success(conflict);
     }
 
     @Post('create')
     @ApiResponse({
-        status: 201,
+        status: HttpStatus.CREATED,
         type: Conflict
     })
     async createConflict(@Body(new GeojsonValidationPipe('location')) conflictDto: ConflictDto): Promise<ApiHttpResponse<Conflict>> {
         const createdConflict = await this.conflictsService.create(conflictDto);
-        return this.responseHelper.ok(createdConflict, HttpStatus.CREATED);
+        return this.responseHelper.success(createdConflict, HttpStatus.CREATED);
     }
 
     @Put(':id')
     @ApiResponse({
-        status: 200,
+        status: HttpStatus.OK,
         type: Conflict
     })
-    @ApiResponse({ status: 404, description: 'Not found.' })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found.' })
     async updateConflict(@Param('id', ParseUUIDPipe) id: string, @Body(new GeojsonValidationPipe('location')) conflictDto: ConflictDto): Promise<ApiHttpResponse<Conflict>> {
         const updatedConflict = await this.conflictsService.update(id, conflictDto);
         if (!updatedConflict) {
             throw new NotFoundException();
         }
-        return this.responseHelper.ok(updatedConflict);
+        return this.responseHelper.success(updatedConflict);
     }
 
     @Delete(':id')
     @ApiResponse({
-        status: 200,
+        status: HttpStatus.OK,
         type: ApiHttpResponse
     })
-    @ApiResponse({ status: 404, description: 'Not found.' })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found.' })
     async deleteConflict(@Param('id', ParseUUIDPipe) id: string): Promise<ApiHttpResponse> {
         const exists = await this.conflictsService.getById(id);
         if (!exists) {
@@ -110,16 +123,17 @@ export class ConflictsController {
         if (!isDeleted) {
             throw new InternalServerErrorException(exists, 'Could not delete conflic. Please try again.');
         }
-        return this.responseHelper.ok('Conflict deleted');
+        return this.responseHelper.success('Conflict deleted');
     }
 
     @Post('resolve/:id')
+    @HttpCode(HttpStatus.OK)
     @ApiResponse({
-        status: 200,
+        status: HttpStatus.OK,
         type: Conflict
     })
-    @ApiResponse({ status: 400, description: 'Bad Request.' })
-    @ApiResponse({ status: 404, description: 'Not found.' })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request.' })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found.' })
     async resolveConflict(@Param('id', ParseUUIDPipe) id: string, @Body() body: ResolveDto): Promise<ApiHttpResponse<Conflict>> {
         const conflict = await this.conflictsService.getById(id, false);
         if (!conflict) {
@@ -146,7 +160,7 @@ export class ConflictsController {
         if (!winner) {
             throw new BadRequestException(null, 'invalid selection.')
         }
-        
+
         await this.conflictsService.resolve(conflict, {
             resolution_server: winner.server,
             resolution_entity: winner.entity,
@@ -154,6 +168,6 @@ export class ConflictsController {
             resolved_by: resolvedBy
         });
 
-        return this.responseHelper.ok(await this.conflictsService.getById(id));
+        return this.responseHelper.success(await this.conflictsService.getById(id));
     }
 }

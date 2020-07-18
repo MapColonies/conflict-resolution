@@ -1,17 +1,16 @@
-// TODO: support in transaction
-import { countRecords } from './queries';
+import { countRecordsByQuery, callQuery } from './common-queries';
 import { PaginationConfig } from '../../models/pagination-config';
-import { ConflictQueryParams } from 'src/conflicts/models/conflict-query-params';
+import { trx } from './knex-types';
 
-export const paginate = async (query: any, paginationConfig: PaginationConfig, queryParams: ConflictQueryParams = null) => {  
+export const paginate = async (query: any, paginationConfig: PaginationConfig, inTransaction?: trx) => {
   const result: any = {};
   paginationConfig.fillData(result);
   if (paginationConfig.getCount) {
-    result.total = +(await countRecords(query._single.table, queryParams)).count;
+    result.total = +(await countRecordsByQuery(query)).count;
     result.lastPage = Math.ceil(result.total / result.perPage);
   }
   query.offset(paginationConfig.offset).limit(paginationConfig.perPage);
-  result.data = await query;
+  result.data = await callQuery(query, inTransaction);
   if (result.lastPage >= result.currentPage) {
     result.from = result.offset;
     result.to = result.offset + result.data.length;

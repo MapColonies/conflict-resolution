@@ -12,6 +12,8 @@ import { queryConflicts } from './conflicts.queries';
 import { ConflictQueryParams } from 'src/conflicts/models/conflict-query-params';
 import { QueryService } from 'src/shared/query.service';
 import { textToGeojson } from 'src/util';
+import { trx } from 'src/global/services/postgres/knex-types';
+import { OrderByOptions } from 'src/global/models/order-by-options';
 
 @Injectable()
 export class ConflictsService {
@@ -35,18 +37,19 @@ export class ConflictsService {
         const data = await this.queryService.getRecordById(tableNames.conflicts,
             id,
             asGeojson ? postgis.asGeoJSON('location') : null)
-        if (asGeojson) {
+        if (data && asGeojson) {
             this.parseConflictLocationToGeojson(data)
         }
         return data;
     };
 
-    async search(text: string, paginationConfig: PaginationConfig) {
+    async search(text: string, paginationConfig: PaginationConfig, orderByOptions?: OrderByOptions) {
         const res = await this.queryService.fullTextSearch(tableNames.conflicts,
             ["target_entity", "source_entity"],
             text,
             paginationConfig,
-            postgis.asGeoJSON('location')
+            postgis.asGeoJSON('location'),
+            orderByOptions
         );
         if (res?.data) {
             this.parseConflictsLocationsToGeojson(res.data);
@@ -81,7 +84,7 @@ export class ConflictsService {
 
     async resolve(conflict: Conflict, resolution: {}): Promise<void> {
         try {
-            await this.knex.transaction(async (trx) => {
+            await this.knex.transaction(async (trx: trx) => {
                 const createdResolution = (
                     await this.queryService.createRecord(tableNames.resolutions, resolution, null, null, trx)
                 );
@@ -104,7 +107,7 @@ export class ConflictsService {
         }
     }
 
-    async query(conflictQueryParams: ConflictQueryParams, paginationConfig: PaginationConfig): Promise<PaginationResult<Conflict>> {
+    async query(conflictQueryParams: ConflictQueryParams, paginationConfig: PaginationConfig, orderByOptions: OrderByOptions): Promise<PaginationResult<Conflict>> {
         if (!conflictQueryParams.isValid()) {
             throw new BadRequestException(null, 'Query is invalid.')
         }
@@ -112,7 +115,8 @@ export class ConflictsService {
             this.knex,
             conflictQueryParams,
             paginationConfig,
-            postgis.asGeoJSON('location')
+            postgis.asGeoJSON('location'),
+            orderByOptions
         );
         if (res?.data) {
             this.parseConflictsLocationsToGeojson(res.data);

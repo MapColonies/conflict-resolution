@@ -37,6 +37,8 @@ module.exports = [
         }
       ]
     },
+    source_change_type: 'modify',
+    target_change_type: 'delete',
     description: 'some desc 1',
     has_resolved: false,
   },
@@ -49,6 +51,8 @@ module.exports = [
     target_entity: {
       numnum: '777'
     },
+    source_change_type: 'delete',
+    target_change_type: 'none',
     description: 'some desc 2',
     has_resolved: true,
   },
@@ -61,6 +65,8 @@ module.exports = [
     target_entity: {
       numnum: '111'
     },
+    source_change_type: 'create',
+    target_change_type: 'create',
     description: 'some desc 3',
     has_resolved: false,
   },

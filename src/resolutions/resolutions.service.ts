@@ -7,6 +7,9 @@ import { PaginationConfig } from 'src/global/models/pagination-config';
 import tableNames = require('../global/services/postgres/table-names');
 import { FullResolution } from './models/full-resolution';
 import { QueryService } from 'src/shared/query.service';
+import { trx } from 'src/global/services/postgres/knex-types';
+import { OrderByOptions } from 'src/global/models/order-by-options';
+import { Resolution } from './models/resolution';
 
 @Injectable()
 export class ResolutionsService {
@@ -15,15 +18,18 @@ export class ResolutionsService {
         private readonly queryService: QueryService
       ) {}
 
-    async getAll(paginationConf: PaginationConfig): Promise<PaginationResult<FullResolution>> {
-        return await getAllResolutions(paginationConf);
+    async getAll(paginationConf: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<FullResolution>> {
+        return await getAllResolutions(paginationConf, orderByOptions);
     };
 
-    async search(text: string, paginationConfig: PaginationConfig) {
+    // TODO: get the fullConflictResolution object and have it work with order by
+    async search(text: string, paginationConfig: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<Resolution>> {
         return await this.queryService.fullTextSearch(tableNames.resolutions,
             ["resolution_entity"],
             text,
-            paginationConfig
+            paginationConfig,
+            null,
+            orderByOptions
         );
     };
 
@@ -34,7 +40,7 @@ export class ResolutionsService {
     async delete(resolution: FullResolution): Promise<void> {
         try {
             // in transaction call for deletion of the resolution and update of the conflict
-            await this.knex.transaction(async (trx) => {
+            await this.knex.transaction(async (trx: trx) => {
                 const isDeleted = await this.queryService.deleteRecord(
                     tableNames.resolutions,
                     resolution.resolution_id,

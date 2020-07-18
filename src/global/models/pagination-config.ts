@@ -1,17 +1,14 @@
 import { PaginationResult } from './pagination-result';
-
-export const defaultPerPage = 10;
-export const minPerPage = 1;
-export const maxPerPage = 100
+import { minPage, defaultPerPage, minPerPage, maxPerPage} from '../constants';
 
 export class PaginationConfig {
   offset: number;
-  constructor(public currentPage: number = 1, public perPage: number = defaultPerPage, public getCount: boolean = true) {
+  constructor(public currentPage: number = minPage, public perPage: number = defaultPerPage, public getCount: boolean = true) {
     this.currentPage = +currentPage;
-    if (currentPage < 1) this.currentPage = 1;
+    if (currentPage < minPage) this.currentPage = minPage;
     if (perPage < minPerPage) this.perPage = defaultPerPage;
     if (perPage > maxPerPage) this.perPage = maxPerPage;
-    this.offset = (this.currentPage - 1) * this.perPage;
+    this.offset = this.currentPage * this.perPage;
   }
 
   fillData(result: PaginationResult<any>) {
