@@ -3,8 +3,7 @@ import { InjectKnex, Knex as NestKnex } from 'nestjs-knex';
 
 import { trx, knexQuery, ExtendedKnexRaw } from 'src/global/services/postgres/knex-types';
 import { PaginationConfig } from '../global/models/pagination-config';
-import { TEXT_SEARCH_VECTOR_TYPE } from '../global/services/postgres/migration/custom-functions';
-import { setFields, callQuery } from '../global/services/postgres/common-queries';
+import { setFields, callQuery, addTextSearch } from '../global/services/postgres/common-queries';
 import { OrderByOptions } from 'src/global/models/order-by-options';
 
 @Injectable()
@@ -17,16 +16,7 @@ export class QueryService {
         selectionFunc?: ExtendedKnexRaw, orderByOptions?: OrderByOptions, fields?: string[]): Promise<knexQuery> {
         const selectedFields = setFields(fields);
         const query = this.knex(tableName).select(selectedFields);
-        const numOfFields = fieldNames.length;
-        let rawQuery = '';
-        fieldNames.map((fieldName: string, index: number) => {
-            if (numOfFields !== index + 1) {
-                rawQuery += (`to_tsvector('${TEXT_SEARCH_VECTOR_TYPE}', ${fieldName}::text) ||`)
-            } else {
-                rawQuery += (`to_tsvector('${TEXT_SEARCH_VECTOR_TYPE}', ${fieldName}::text) @@ plainto_tsquery('${TEXT_SEARCH_VECTOR_TYPE}', '${text}')`)
-            }
-        })
-        query.whereRaw(rawQuery);
+        addTextSearch(query, fieldNames, text);
         if (selectionFunc) {
             query.select(selectedFields, selectionFunc);
         }

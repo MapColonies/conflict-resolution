@@ -1,28 +1,20 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 
 import { Conflict } from "src/conflicts/models/conflict";
+import { BaseResolution } from './base-resolution';
 
-export class FullResolution {
+export class FullResolution extends PartialType(BaseResolution) {
     @ApiProperty()
     resolution_id: string;
 
     @ApiProperty()
-    resolution_server: string;
+    resolution_created_at: Date;
 
     @ApiProperty()
-    resolution_entity: object;
-
-    @ApiPropertyOptional()
-    resolved_by?: string;
-
-    @ApiPropertyOptional()
-    resolved_by_id?: string;
+    resolution_updated_at: Date;
 
     @ApiProperty()
-    r_created_at: Date;
-
-    @ApiProperty()
-    r_updated_at: Date;
+    resolution_deleted_at?: Date;
 
     @ApiProperty({ type: () => Conflict })
     conflict: Conflict;

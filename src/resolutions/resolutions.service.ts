@@ -1,15 +1,15 @@
 import {Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectKnex, Knex } from 'nestjs-knex';
 
-import { getAllResolutions, getResolutionById } from './resolutions.queries';
+import { getAllResolutions, getResolutionById, searchResolutions } from './resolutions.queries';
 import { PaginationResult } from 'src/global/models/pagination-result';
 import { PaginationConfig } from 'src/global/models/pagination-config';
 import tableNames = require('../global/services/postgres/table-names');
-import { FullResolution } from './models/full-resolution';
 import { QueryService } from 'src/shared/query.service';
 import { trx } from 'src/global/services/postgres/knex-types';
 import { OrderByOptions } from 'src/global/models/order-by-options';
 import { Resolution } from './models/resolution';
+import { BaseResolution } from './models/base-resolution';
 
 @Injectable()
 export class ResolutionsService {
@@ -18,32 +18,31 @@ export class ResolutionsService {
         private readonly queryService: QueryService
       ) {}
 
-    async getAll(includeConflicts: boolean, paginationConf: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<FullResolution>> {
+    async getAll(includeConflicts: boolean, paginationConf: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<BaseResolution>> {
         return await getAllResolutions(includeConflicts, paginationConf, orderByOptions);
     };
 
-    // TODO: get the fullConflictResolution object and have it work with order by
-    async search(text: string, paginationConfig: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<Resolution>> {
-        return await this.queryService.fullTextSearch(tableNames.resolutions,
-            ['resolution_entity'],
+    async search(text: string, paginationConfig: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<BaseResolution>> {
+        return await searchResolutions(
+            ['resolutions.resolution_entity'],
             text,
             paginationConfig,
-            null,
+            false,
             orderByOptions
         );
     };
 
-    async getById(id: string, includeConflic?: boolean): Promise<FullResolution> {
+    async getById(id: string, includeConflic?: boolean): Promise<BaseResolution> {
         return await getResolutionById(id, includeConflic);
     };
 
-    async delete(resolution: FullResolution): Promise<void> {
+    async delete(resolution: Resolution): Promise<void> {
         try {
             // in transaction call for deletion of the resolution and update of the conflict
             await this.knex.transaction(async (trx: trx) => {
                 const isDeleted = await this.queryService.deleteRecord(
                     tableNames.resolutions,
-                    resolution.resolution_id,
+                    resolution.id,
                     trx
                 );
                 if (!isDeleted) {
@@ -53,7 +52,7 @@ export class ResolutionsService {
                 // get resolution's conflict and update it
                 const conflict = await this.queryService.getRecordById(
                     tableNames.conflicts,
-                    resolution.conflict.id,
+                    resolution.conflict_id,
                     null,
                     null,
                     trx

@@ -12,7 +12,7 @@ const {
   addDefaultColumns,
   createReference,
   rollbackDropReference
-} = require('../../src/global/services/postgres/migration/table-utils');
+} = require('../../src/global/services/postgres/migration/table-utils').default;
 
 /**
  * @param {Knex} knex
@@ -33,7 +33,7 @@ exports.up = async (knex) => {
         table.string('description', 1000);
         table.boolean('has_resolved').defaultTo(false);
         table.datetime('resolved_at');
-        table.specificType('location', 'geometry');// table.specificType('location', 'geometry(point, 4326)');
+        table.specificType('location', 'geometry');
         createReference(table, tableNames.resolutions, 'set null', true);
         addDefaultColumns(table);
       })
@@ -53,8 +53,6 @@ exports.up = async (knex) => {
   await knex.raw(CREATE_INDEX(tableNames.conflicts, 'source_entity', 'idx_conflict_source_entity_full_text'));
   await knex.raw(CREATE_INDEX(tableNames.conflicts, 'target_entity', 'idx_conflict_target_entity_full_text'));
 };
-
-// TODO: convert plural names to singular
 
 /**
  * @param {Knex} knex

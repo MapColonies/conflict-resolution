@@ -3,16 +3,16 @@ import { OrderByOptions } from 'src/global/models/order-by-options';
 
 @Injectable()
 export class OrderByValidationPipe implements PipeTransform {
-    constructor(private tableName: string) { }
+    constructor(private tableNames: string[]) { }
 
     async transform(value: any, metadata: ArgumentMetadata) {
-        const { columnName, isAscending } = value;
+        const { columnName, sortType } = value;
         // meaning no orderBy was asked
         if (!columnName) {
             return null;
         }
-        const orderByOptions = new OrderByOptions(columnName, isAscending, this.tableName)
-        if (!orderByOptions.isValid()) {
+        const orderByOptions = new OrderByOptions(columnName, sortType)
+        if (!orderByOptions.isValid(this.tableNames)) {
             throw new BadRequestException(`Invalid Order By.`);
         }
         return orderByOptions;

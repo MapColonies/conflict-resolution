@@ -1,5 +1,5 @@
 import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsPositive, IsObject, ValidateNested, IsBoolean, IsArray } from 'class-validator';
+import { IsInt, IsOptional, IsObject, ValidateNested, IsBoolean, IsArray, Min } from 'class-validator';
 import { Type } from "class-transformer";
 
 import { PaginationQueryDto } from '../../global/models/pagination-query-dto';
@@ -9,14 +9,14 @@ export class ConflictQueryDto extends PartialType(PaginationQueryDto){
     @ApiPropertyOptional()
     @IsOptional()
     @IsInt()
-    @IsPositive()
+    @Min(0)
     @Type(() => Number)
     from?: number;
 
     @ApiPropertyOptional()
     @IsOptional()
     @IsInt()
-    @IsPositive()
+    @Min(0)
     @Type(() => Number)
     to?: number;
 

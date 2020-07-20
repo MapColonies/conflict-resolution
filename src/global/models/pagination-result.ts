@@ -1,7 +1,8 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 
 import { Conflict } from '../../conflicts/models/conflict';
-import { FullResolution } from 'src/resolutions/models/full-resolution';
+import { FullResolution } from '../../resolutions/models/full-resolution';
+import { Resolution } from '../../resolutions/models/resolution';
 
 export class PaginationResult<T> {
     @ApiProperty()
@@ -19,14 +20,16 @@ export class PaginationResult<T> {
     @ApiPropertyOptional()
     lastPage?: number;
 
+    // FIXME: resolution doesn't show on swagger
     @ApiProperty({
         oneOf: [
             { $ref: getSchemaPath(Conflict) },
-            { $ref: getSchemaPath(FullResolution) }
+            { $ref: getSchemaPath(FullResolution) },
+            { $ref: getSchemaPath(Resolution) }
         ],
-        type: [Conflict, FullResolution]
+        type: [Conflict, FullResolution, Resolution]
     })
-    data: [Conflict] | [FullResolution]
+    data: [Conflict] | [FullResolution] | [Resolution]
 
     @ApiPropertyOptional()
     from?: number;

@@ -1,3 +1,5 @@
+const pluralize = require('pluralize');
+
 const addDefaultColumns = table => {
   table.timestamps(false, true);
   table.datetime('deleted_at');
@@ -48,14 +50,20 @@ const rollbackDropIndex = async (
   });
 };
 
+// TODO: split the word out of the whole id name
+// TODO: remove to util
 const convertToSingular = word => {
-  if (word.slice(-1) === 's') {
-    return word.slice(0, -1);
+  if (pluralize.isSingular) {
+    return word
   }
-  return word;
+  return pluralize.singular(word);
+  // if (word.slice(-1) === 's') {
+  //   return word.slice(0, -1);
+  // }
+  // return word;
 }
 
-module.exports = {
+export default {
   addDefaultColumns,
   createDummyTable,
   createReference,

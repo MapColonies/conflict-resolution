@@ -4,6 +4,8 @@ import { OrderByOptions } from 'src/global/models/order-by-options';
 import { PaginationConfig } from 'src/global/models/pagination-config';
 import { paginate } from './pagination';
 import { QueryJoinObject } from './query-join-object';
+import { TEXT_SEARCH_VECTOR_TYPE } from './migration/custom-functions';
+import tableNames = require('./table-names');
 
 export const countRecords = async (tableName: string, inTransaction?: trx): Promise<knexQuery> => {
   const query = db(tableName).count('* as count').first();
@@ -20,7 +22,7 @@ export const countRecordsByQuery = async (query: any, inTransaction?: trx): Prom
 
 export const setFields = (fields: string[]): string | string[] => {
   if (!fields) {
-      return '*';
+    return '*';
   }
   return fields;
 };
@@ -36,9 +38,10 @@ export const callQuery = async (query: knexQuery, inTransaction?: trx, paginatio
   return await query;
 };
 
+// TODO: should we have validation here? and if so should we have the tableNames as parameter?
 export const orderByQuery = (query: knexQuery, orderByOptions: OrderByOptions): void => {
-  if (orderByOptions?.isValid()) {
-    query?.orderBy(orderByOptions.columnName, orderByOptions.isAscending ? 'asc' : 'desc')
+  if (orderByOptions?.isValid([tableNames.conflicts, tableNames.resolutions])) {
+    query?.orderBy(orderByOptions.columnName, orderByOptions.sortType)
   }
 }
 
@@ -58,11 +61,24 @@ export const timeQuery = (query: knexQuery, fieldName: string, from: Date, to: D
 
 export const joinQuery = (query: knexQuery, joinObject: QueryJoinObject, selectionFunc?: ExtendedKnexRaw, fields?: string[]): void => {
   const joinColumnsMap = {}
-  joinObject.joinColumns.forEach((joinColumn) => { joinColumnsMap[joinColumn.leftColumn] = joinColumn.rigthColumn});
+  joinObject.joinColumns.forEach((joinColumn) => { joinColumnsMap[joinColumn.leftColumn] = joinColumn.rigthColumn });
   query.join(joinObject.rightTable, joinColumnsMap)
   const selectedFields = setFields(fields);
   if (selectionFunc) {
     query.select(selectedFields, selectionFunc);
   }
   query.groupBy(`${joinObject.leftTable}.id`, `${joinObject.rightTable}.id`);
+}
+
+export const addTextSearch = (query: knexQuery, fieldNames: string[], text: string) => {
+  const numOfFields = fieldNames.length;
+  let rawQuery = '';
+  fieldNames.map((fieldName: string, index: number) => {
+    if (numOfFields !== index + 1) {
+      rawQuery += (`to_tsvector('${TEXT_SEARCH_VECTOR_TYPE}', ${fieldName}::text) ||`)
+    } else {
+      rawQuery += (`to_tsvector('${TEXT_SEARCH_VECTOR_TYPE}', ${fieldName}::text) @@ plainto_tsquery('${TEXT_SEARCH_VECTOR_TYPE}', '${text}')`)
+    }
+  })
+  query.whereRaw(rawQuery);
 }

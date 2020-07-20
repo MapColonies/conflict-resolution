@@ -1,7 +1,6 @@
 import {
     Controller, Get, Query, Param, NotFoundException, Post, Body, Put, Delete, HttpStatus,
-    InternalServerErrorException, BadRequestException, ParseUUIDPipe, UsePipes, HttpCode, Res, Type
-} from '@nestjs/common';
+    InternalServerErrorException, BadRequestException, ParseUUIDPipe, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
 
 import { ApiHttpResponse } from '../global/models/common/api-http-response';
@@ -20,6 +19,7 @@ import { OrderByOptions } from 'src/global/models/order-by-options';
 import { OrderByValidationPipe } from 'src/shared/order-by-validation.pipe';
 import tableNames = require('../global/services/postgres/table-names');
 
+// TODO: add bbox endpoint
 @ApiTags('conflicts')
 @Controller('conflicts')
 export class ConflictsController {
@@ -41,7 +41,7 @@ export class ConflictsController {
         description: 'Query is invalid.'
     })
     async queryConflicts(@Body(new GeojsonValidationPipe('geojson')) body?: ConflictQueryDto,
-        @Query(new OrderByValidationPipe(tableNames.conflicts)) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
+        @Query(new OrderByValidationPipe([tableNames.conflicts])) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
         const { page, limit, from, to, geojson, keywords, resolved } = body;
         const conflictQueryParams = new ConflictQueryParams(
             from,
@@ -65,7 +65,7 @@ export class ConflictsController {
         type: PaginationResult
     })
     // TODO: should create type for TextSearchDto + OrderByOptions?
-    async searchConflicts(@Query() query: TextSearchDto, @Query(new OrderByValidationPipe(tableNames.conflicts)) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
+    async searchConflicts(@Query() query: TextSearchDto, @Query(new OrderByValidationPipe([tableNames.conflicts])) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
         const result = await this.conflictsService.search(query.text, new PaginationConfig(query.page, query.limit), orderByOptions);
         return this.responseHelper.success(result);
     }

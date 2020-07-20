@@ -7,7 +7,7 @@ import { DEFAULT_SRID, createGeometryFromGeojson } from '../global/services/post
 import { ConflictQueryParams } from 'src/conflicts/models/conflict-query-params';
 import { timeQuery, setFields, callQuery } from '../global/services/postgres/common-queries';
 import { knexQuery, ExtendedKnexRaw } from 'src/global/services/postgres/knex-types';
-import { keywordsColumns } from 'src/global/constants';
+import { KEYWORD_QUERY_COLUMNS } from 'src/global/constants';
 import { OrderByOptions } from 'src/global/models/order-by-options';
 
 export const queryConflicts = async (knex: Knex, queryParams: ConflictQueryParams, paginationConf?: PaginationConfig, selectionFunc?: ExtendedKnexRaw, orderByOptions?: OrderByOptions, fields?: string[]) => {
@@ -24,16 +24,17 @@ export const buildConflictsQuery = (query: knexQuery, queryParams: ConflictQuery
   if (queryParams.geojson) {
     const geometryA = postgis.setSRID('location', DEFAULT_SRID);
     const geometryB = postgis.setSRID(createGeometryFromGeojson(queryParams.geojson), DEFAULT_SRID);
-    query.where(postgis.within(geometryA, geometryB));
-    query.orWhere(postgis.intersects(geometryA, geometryB));
+    query.where(function() {
+      this.where(postgis.within(geometryA, geometryB)).orWhere(postgis.intersects(geometryA, geometryB));  
+    })
   }
   if (queryParams.hasResolved !== undefined) {
-    query.where('has_resolved', queryParams.hasResolved);
+    query.andWhere('has_resolved', queryParams.hasResolved);
   }
   if (queryParams.keywords.length > 0) {
-    query.where((query: knexQuery) => {
+    query.andWhere((query: knexQuery) => {
       queryParams.keywords.map((keyword: string) => {
-        keywordsColumns.forEach((column: string) =>
+        KEYWORD_QUERY_COLUMNS.forEach((column: string) =>
           query.orWhere(column, 'LIKE', `%${keyword}%`)
         );
       });

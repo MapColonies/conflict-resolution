@@ -12,6 +12,8 @@ import { ApiHttpResponse } from 'src/global/models/common/api-http-response';
 import { OrderByOptions } from 'src/global/models/order-by-options';
 import { OrderByValidationPipe } from 'src/shared/order-by-validation.pipe';
 import tableNames = require('../global/services/postgres/table-names');
+import { BaseResolution } from './models/base-resolution';
+import { Resolution } from './models/resolution';
 
 @ApiTags('resolutions')
 @Controller('resolutions')
@@ -26,7 +28,8 @@ export class ResolutionsController {
         type: PaginationResult
     })
     // TODO: add resolutionQueryParams(will have includeConflicts flag)
-    async getAllResolutions(@Query() query: PaginationQueryDto, @Query(new OrderByValidationPipe(tableNames.resolutions)) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<FullResolution>>> {
+    // TODO: with resolutionQueryParams change the OrderByValidationPipe accordingly
+    async getAllResolutions(@Query() query: PaginationQueryDto, @Query(new OrderByValidationPipe([tableNames.resolutions, tableNames.conflicts])) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<BaseResolution>>> {
         const resolutions = await this.resolutionsService.getAll(true, new PaginationConfig(query.page, query.limit), orderByOptions);
         return this.responseHelper.success(resolutions);
     }
@@ -37,7 +40,7 @@ export class ResolutionsController {
         status: HttpStatus.OK,
         type: PaginationResult
     })
-    async searchResolutions(@Query() query: TextSearchDto, @Query(new OrderByValidationPipe(tableNames.resolutions)) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<FullResolution>>> {
+    async searchResolutions(@Query() query: TextSearchDto, @Query(new OrderByValidationPipe([tableNames.resolutions, tableNames.conflicts])) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<BaseResolution>>> {
         const resolutions = await this.resolutionsService.search(query.text, new PaginationConfig(query.page, query.limit), orderByOptions);
         return this.responseHelper.success(resolutions);
     }
@@ -48,7 +51,7 @@ export class ResolutionsController {
         type: FullResolution
     })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found.' })
-    async getResolutionById(@Param('id', ParseUUIDPipe) id: string): Promise<ApiHttpResponse<FullResolution>> {
+    async getResolutionById(@Param('id', ParseUUIDPipe) id: string): Promise<ApiHttpResponse<BaseResolution>> {
         const resolution = await this.resolutionsService.getById(id, true);
         if (!resolution) {
             throw new NotFoundException(null, 'Resolution could not be found.');
@@ -63,11 +66,11 @@ export class ResolutionsController {
     })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found.' })
     async deleteResolution(@Param('id', ParseUUIDPipe) id: string): Promise<ApiHttpResponse> {
-        const exists = await this.resolutionsService.getById(id);
+        const exists = await this.resolutionsService.getById(id, false);
         if (!exists) {
             throw new NotFoundException();
         }
-        await this.resolutionsService.delete(exists);
+        await this.resolutionsService.delete(exists as Resolution);
         return this.responseHelper.success('Conflict resolution deleted.');
     }
 }

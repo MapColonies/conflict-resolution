@@ -1,6 +1,6 @@
 import { unixMillisecondsToDate } from '../../util/times';
 import { CustomGeoJson } from 'src/global/models/custom-geojson';
-import { minKeywordLength } from 'src/global/constants';
+import { MIN_KEYOWRD_LENGTH } from 'src/global/constants';
 import { validateGeojson } from 'src/util';
 import { QueryParams } from 'src/global/models/query-params';
 
@@ -15,7 +15,7 @@ export class ConflictQueryParams implements QueryParams {
     if (keywords) {
       // filter by word length
       keywords = keywords.filter(keyword =>
-        keyword.length >= minKeywordLength
+        keyword.length >= MIN_KEYOWRD_LENGTH
       );
       // store unique values
       this.keywords = [...new Set(keywords)];
@@ -23,7 +23,7 @@ export class ConflictQueryParams implements QueryParams {
   }
 
   isValid(): boolean {
-    if (this.from && this.to && this.from > this.to) {
+    if (this.from && this.to && this.from >= this.to) {
       return false;
     }
       return this.geojson ? (validateGeojson(this.geojson)?.length === 0) : true;
