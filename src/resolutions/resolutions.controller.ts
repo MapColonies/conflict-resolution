@@ -25,8 +25,9 @@ export class ResolutionsController {
         status: HttpStatus.OK,
         type: PaginationResult
     })
+    // TODO: add resolutionQueryParams(will have includeConflicts flag)
     async getAllResolutions(@Query() query: PaginationQueryDto, @Query(new OrderByValidationPipe(tableNames.resolutions)) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<FullResolution>>> {
-        const resolutions = await this.resolutionsService.getAll(new PaginationConfig(query.page, query.limit), orderByOptions);
+        const resolutions = await this.resolutionsService.getAll(true, new PaginationConfig(query.page, query.limit), orderByOptions);
         return this.responseHelper.success(resolutions);
     }
 
@@ -48,7 +49,7 @@ export class ResolutionsController {
     })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found.' })
     async getResolutionById(@Param('id', ParseUUIDPipe) id: string): Promise<ApiHttpResponse<FullResolution>> {
-        const resolution = await this.resolutionsService.getById(id);
+        const resolution = await this.resolutionsService.getById(id, true);
         if (!resolution) {
             throw new NotFoundException(null, 'Resolution could not be found.');
         }

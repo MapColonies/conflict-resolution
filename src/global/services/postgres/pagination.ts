@@ -6,7 +6,8 @@ export const paginate = async (query: any, paginationConfig: PaginationConfig, i
   const result: any = {};
   paginationConfig.fillData(result);
   if (paginationConfig.getCount) {
-    result.total = +(await countRecordsByQuery(query)).count;
+    // TODO: get the count func as variable
+    result.total = +(await countRecordsByQuery(query, inTransaction)).count;
     result.lastPage = Math.ceil(result.total / result.perPage);
   }
   query.offset(paginationConfig.offset).limit(paginationConfig.perPage);

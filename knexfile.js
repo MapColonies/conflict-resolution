@@ -1,6 +1,6 @@
 const { postgresConfig } = require('./src/config/postgres-config')
 
-// FIXME: host should be 'posgis'(docker container name) while queries and 'localhost' while migations and seeds
+// FIXME: host should be 'postgis'(docker container name) while queries and 'localhost' while migations and seeds
 
 module.exports = {
   development: {

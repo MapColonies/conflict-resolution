@@ -1,8 +1,9 @@
-import { trx, knexQuery } from 'src/global/services/postgres/knex-types';
+import { trx, knexQuery, ExtendedKnexRaw } from 'src/global/services/postgres/knex-types';
 import { db } from './db-connection';
 import { OrderByOptions } from 'src/global/models/order-by-options';
 import { PaginationConfig } from 'src/global/models/pagination-config';
 import { paginate } from './pagination';
+import { QueryJoinObject } from './query-join-object';
 
 export const countRecords = async (tableName: string, inTransaction?: trx): Promise<knexQuery> => {
   const query = db(tableName).count('* as count').first();
@@ -54,3 +55,14 @@ export const timeQuery = (query: knexQuery, fieldName: string, from: Date, to: D
     query.where(fieldName, '<', to);
   }
 };
+
+export const joinQuery = (query: knexQuery, joinObject: QueryJoinObject, selectionFunc?: ExtendedKnexRaw, fields?: string[]): void => {
+  const joinColumnsMap = {}
+  joinObject.joinColumns.forEach((joinColumn) => { joinColumnsMap[joinColumn.leftColumn] = joinColumn.rigthColumn});
+  query.join(joinObject.rightTable, joinColumnsMap)
+  const selectedFields = setFields(fields);
+  if (selectionFunc) {
+    query.select(selectedFields, selectionFunc);
+  }
+  query.groupBy(`${joinObject.leftTable}.id`, `${joinObject.rightTable}.id`);
+}

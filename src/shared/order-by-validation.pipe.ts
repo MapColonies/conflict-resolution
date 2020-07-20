@@ -7,7 +7,7 @@ export class OrderByValidationPipe implements PipeTransform {
 
     async transform(value: any, metadata: ArgumentMetadata) {
         const { columnName, isAscending } = value;
-        // than no orderBy was asked
+        // meaning no orderBy was asked
         if (!columnName) {
             return null;
         }

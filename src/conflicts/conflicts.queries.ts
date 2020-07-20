@@ -5,7 +5,7 @@ import { PaginationConfig } from 'src/global/models/pagination-config';
 import { postgis } from '../global/services/postgis'
 import { DEFAULT_SRID, createGeometryFromGeojson } from '../global/services/postgis/util'
 import { ConflictQueryParams } from 'src/conflicts/models/conflict-query-params';
-import { timeQuery, setFields, callQuery } from '../global/services/postgres/common-queries'
+import { timeQuery, setFields, callQuery } from '../global/services/postgres/common-queries';
 import { knexQuery, ExtendedKnexRaw } from 'src/global/services/postgres/knex-types';
 import { keywordsColumns } from 'src/global/constants';
 import { OrderByOptions } from 'src/global/models/order-by-options';

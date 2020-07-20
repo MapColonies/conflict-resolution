@@ -18,14 +18,14 @@ export class ResolutionsService {
         private readonly queryService: QueryService
       ) {}
 
-    async getAll(paginationConf: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<FullResolution>> {
-        return await getAllResolutions(paginationConf, orderByOptions);
+    async getAll(includeConflicts: boolean, paginationConf: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<FullResolution>> {
+        return await getAllResolutions(includeConflicts, paginationConf, orderByOptions);
     };
 
     // TODO: get the fullConflictResolution object and have it work with order by
     async search(text: string, paginationConfig: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<Resolution>> {
         return await this.queryService.fullTextSearch(tableNames.resolutions,
-            ["resolution_entity"],
+            ['resolution_entity'],
             text,
             paginationConfig,
             null,
@@ -33,8 +33,8 @@ export class ResolutionsService {
         );
     };
 
-    async getById(id: string): Promise<FullResolution> {
-        return await getResolutionById(id);
+    async getById(id: string, includeConflic?: boolean): Promise<FullResolution> {
+        return await getResolutionById(id, includeConflic);
     };
 
     async delete(resolution: FullResolution): Promise<void> {
