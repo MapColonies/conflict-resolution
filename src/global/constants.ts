@@ -15,12 +15,12 @@ export const KEYWORD_QUERY_COLUMNS = [
   'target_server',
 ];
 
-export const CONFLICTS_ORDER_BY_COLUMNS = [OrderByTypes.CONFLICT_ID, OrderByTypes.CONFLICT_CREATED_AT, OrderByTypes.CONFLICT_UPDATED_AT, OrderByTypes.CONFLICT_DELETED_AT,
-OrderByTypes.CONFLICT_RESOLVED_AT, OrderByTypes.CONFLICT_HAS_RESOLVED, OrderByTypes.CONFLICT_DESCRIPTION,
-OrderByTypes.CONFLICT_SOURCE_SERVER, OrderByTypes.CONFLICT_TARGET_SERVER, OrderByTypes.CONFLICT_SOURCE_CHANGE_TYPE, OrderByTypes.CONFLICT_TARGET_CHANGE_TYPE];
+export const CONFLICTS_ORDER_BY_COLUMNS = [OrderByTypes.conflictId, OrderByTypes.conflictCreatedAt, OrderByTypes.conflictLastUpdatedAt, OrderByTypes.conflictDeletedAt,
+OrderByTypes.conflictResolvedAt, OrderByTypes.conflictHasResolved, OrderByTypes.conflictDescripton,
+OrderByTypes.conflictSourceServer, OrderByTypes.conflictTargetServer, OrderByTypes.conflictSourceChangeType, OrderByTypes.conflictTargetChangeType];
 
-export const RESOLUTIONS_ORDER_BY_COLUMNS = [OrderByTypes.RESOLUTION_ID,
-OrderByTypes.RESOLUTION_SERVER, OrderByTypes.RESOLUTION_RESOLVED_BY, OrderByTypes.RESOLUTION_RESOLVED_BY_ID, OrderByTypes.RESOLUTION_CREATED_AT, OrderByTypes.RESOLUTION_UPDATED_AT];
+export const RESOLUTIONS_ORDER_BY_COLUMNS = [OrderByTypes.resolutionId,
+OrderByTypes.resolutionServer, OrderByTypes.resolutionResolvedBy, OrderByTypes.resolutionResolvedById, OrderByTypes.resolutionCreatedAt, OrderByTypes.resolutionLastUpdatedAt];
 
 export const ORDER_BY_TABLE_COLUMNS = {
   conflicts: CONFLICTS_ORDER_BY_COLUMNS,

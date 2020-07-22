@@ -12,7 +12,7 @@ const {
   addDefaultColumns,
   createReference,
   rollbackDropReference
-} = require('../../src/global/services/postgres/migration/table-utils').default;
+} = require('../../src/global/services/postgres/migration/table-utils');
 
 /**
  * @param {Knex} knex
@@ -63,14 +63,12 @@ exports.down = async (knex) => {
   await rollbackDropReference(
     knex,
     tableNames.conflicts,
-    // `${tableNames.resolutions}_id`
-    'resolution_id'
+    `${tableNames.resolutions}`
   );
   await rollbackDropReference(
     knex,
     tableNames.resolutions,
-    // `${tableNames.conflicts}_id`
-    'conflict_id'
+    `${tableNames.conflicts}`
   );
   await Promise.all(
     [tableNames.resolutions, tableNames.conflicts].map((tableName) =>

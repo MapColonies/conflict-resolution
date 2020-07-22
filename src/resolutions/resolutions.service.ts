@@ -22,12 +22,12 @@ export class ResolutionsService {
         return await getAllResolutions(includeConflicts, paginationConf, orderByOptions);
     };
 
-    async search(text: string, paginationConfig: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<BaseResolution>> {
+    async search(includeConflicts: boolean, text: string, paginationConfig: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<BaseResolution>> {
         return await searchResolutions(
-            ['resolutions.resolution_entity'],
+            [`${tableNames.resolutions}.resolution_entity`],
             text,
             paginationConfig,
-            false,
+            includeConflicts,
             orderByOptions
         );
     };

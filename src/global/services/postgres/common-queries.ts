@@ -65,7 +65,7 @@ export const joinQuery = (query: knexQuery, joinObject: QueryJoinObject, selecti
   query.join(joinObject.rightTable, joinColumnsMap)
   const selectedFields = setFields(fields);
   if (selectionFunc) {
-    query.select(selectedFields, selectionFunc);
+    query.select(...selectedFields, selectionFunc);
   }
   query.groupBy(`${joinObject.leftTable}.id`, `${joinObject.rightTable}.id`);
 }

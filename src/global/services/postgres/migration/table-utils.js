@@ -32,7 +32,7 @@ const createReference = (
 };
 
 const rollbackDropReference = async (knex, tableName, foreignKey) => {
-  const fkName = convertToSingular(foreignKey);
+  const fkName = `${convertToSingular(foreignKey)}_id`;
   await knex.schema.table(tableName, async t => {
     t.dropForeign(fkName);
     t.dropColumn(fkName);
@@ -50,20 +50,11 @@ const rollbackDropIndex = async (
   });
 };
 
-// TODO: split the word out of the whole id name
-// TODO: remove to util
 const convertToSingular = word => {
-  if (pluralize.isSingular) {
-    return word
-  }
   return pluralize.singular(word);
-  // if (word.slice(-1) === 's') {
-  //   return word.slice(0, -1);
-  // }
-  // return word;
 }
 
-export default {
+module.exports = {
   addDefaultColumns,
   createDummyTable,
   createReference,

@@ -1,44 +1,42 @@
 export enum OrderByTypes {
-    CONFLICT_ID = 'conflicts.id',
-    CONFLICT_CREATED_AT = 'conflicts.created_at',
-    CONFLICT_UPDATED_AT = 'conflicts.updated_at',
-    CONFLICT_DELETED_AT = 'conflicts.deleted_at',
-    CONFLICT_RESOLVED_AT = 'conflicts.resolved_at',
-    CONFLICT_HAS_RESOLVED = 'conflicts.has_resolved',
-    CONFLICT_DESCRIPTION = 'conflicts.description',
-    CONFLICT_SOURCE_SERVER = 'conflicts.source_server',
-    CONFLICT_TARGET_SERVER = 'conflicts.target_server',
-    CONFLICT_SOURCE_CHANGE_TYPE = 'conflicts.source_change_type',
-    CONFLICT_TARGET_CHANGE_TYPE = 'conflicts.target_change_type',
-    RESOLUTION_ID = 'resolutions.id',
-    RESOLUTION_SERVER = 'resolutions.resolution_server',
-    RESOLUTION_RESOLVED_BY = 'resolutions.resolved_by',
-    RESOLUTION_RESOLVED_BY_ID = 'resolutions.resolved_by_id',
-    RESOLUTION_CREATED_AT = 'resolutions.created_at',
-    RESOLUTION_UPDATED_AT = 'resolutions.updated_at'
-}
-
-export enum ExposedOrderByTypes {
-    CONFLICT_ID = 'CONFLICT_ID',
-    CONFLICT_CREATED_AT = 'CONFLICT_CREATED_AT',
-    CONFLICT_UPDATED_AT = 'CONFLICT_UPDATED_AT',
-    CONFLICT_DELETED_AT = 'CONFLICT_DELETED_AT',
-    CONFLICT_RESOLVED_AT = 'CONFLICT_RESOLVED_AT',
-    CONFLICT_HAS_RESOLVED = "CONFLICT_HAS_RESOLVED",
-    CONFLICT_DESCRIPTION = "CONFLICT_DESCRIPTION",
-    CONFLICT_SOURCE_SERVER = "CONFLICT_SOURCE_SERVER",
-    CONFLICT_TARGET_SERVER = "CONFLICT_TARGET_SERVER",
-    CONFLICT_SOURCE_CHANGE_TYPE = "CONFLICT_SOURCE_CHANGE_TYPE",
-    CONFLICT_TARGET_CHANGE_TYPE = "CONFLICT_TARGET_CHANGE_TYPE",
-    RESOLUTION_ID = "RESOLUTION_ID",
-    RESOLUTION_SERVER = "RESOLUTION_SERVER",
-    RESOLUTION_RESOLVED_BY = "RESOLUTION_RESOLVED_BY",
-    RESOLUTION_RESOLVED_BY_ID = "RESOLUTION_RESOLVED_BY_ID",
-    RESOLUTION_CREATED_AT = "RESOLUTION_CREATED_AT",
-    RESOLUTION_UPDATED_AT = "RESOLUTION_UPDATED_AT",
+    conflictId = 'conflicts.id',
+    conflictCreatedAt = 'conflicts.created_at',
+    conflictLastUpdatedAt = 'conflicts.updated_at',
+    conflictDeletedAt = 'conflicts.deleted_at',
+    conflictResolvedAt = 'conflicts.resolved_at',
+    conflictHasResolved = 'conflicts.has_resolved',
+    conflictDescripton = 'conflicts.description',
+    conflictSourceServer = 'conflicts.source_server',
+    conflictTargetServer = 'conflicts.target_server',
+    conflictSourceChangeType = 'conflicts.source_change_type',
+    conflictTargetChangeType = 'conflicts.target_change_type',
+    resolutionId = 'resolutions.id',
+    resolutionServer = 'resolutions.resolution_server',
+    resolutionResolvedBy = 'resolutions.resolved_by',
+    resolutionResolvedById = 'resolutions.resolved_by_id',
+    resolutionCreatedAt = 'resolutions.created_at',
+    resolutionLastUpdatedAt = 'resolutions.updated_at'
 }
 
 export enum SortByTypes {
     ASC = 'asc',
     DESC = 'desc'
+}
+
+// only for swagger doc
+export enum AllOrderByTypes {
+    CONFLICT_CREATED_AT = 'conflictCreatedAt',
+    CONFLICT_UPDATED_AT = 'conflictLastUpdatedAt',
+    CONFLICT_DELETED_AT = 'conflictDeletedAt',
+    CONFLICT_RESOLVED_AT = 'conflictResolvedAt',
+    CONFLICT_HAS_RESOLVED = "conflictHasResolved",
+    CONFLICT_DESCRIPTION = "conflictDescripton",
+    CONFLICT_SOURCE_SERVER = "conflictSourceServer",
+    CONFLICT_TARGET_SERVER = "conflictTargetServer",
+    CONFLICT_SOURCE_CHANGE_TYPE = "conflictSourceChangeType",
+    CONFLICT_TARGET_CHANGE_TYPE = "conflictTargetChangeType",
+    RESOLUTION_SERVER = "resolutionServer",
+    RESOLUTION_RESOLVED_BY = "resolutionResolvedBy",
+    RESOLUTION_CREATED_AT = "resolutionCreatedAt",
+    RESOLUTION_UPDATED_AT = "resolutionLastUpdatedAt",
 }

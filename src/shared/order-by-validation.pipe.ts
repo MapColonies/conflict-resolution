@@ -6,15 +6,23 @@ export class OrderByValidationPipe implements PipeTransform {
     constructor(private tableNames: string[]) { }
 
     async transform(value: any, metadata: ArgumentMetadata) {
-        const { columnName, sortType } = value;
+        const { columnName, sortType, ...rest } = value;
         // meaning no orderBy was asked
         if (!columnName) {
-            return null;
+            return isEmpty(rest) ? null : rest;
         }
-        const orderByOptions = new OrderByOptions(columnName, sortType)
-        if (!orderByOptions.isValid(this.tableNames)) {
+        const validOrderByOptions = new OrderByOptions(columnName, sortType)
+        if (!validOrderByOptions.isValid(this.tableNames)) {
             throw new BadRequestException(`Invalid Order By.`);
         }
-        return orderByOptions;
+        return isEmpty(rest) ? validOrderByOptions : { ...rest, validOrderByOptions };
     }
+}
+
+const isEmpty = (obj: any) => {
+    for(var key in obj) {
+        if(obj.hasOwnProperty(key))
+            return false;
+    }
+    return true;
 }

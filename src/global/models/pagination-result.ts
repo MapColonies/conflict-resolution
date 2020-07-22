@@ -1,9 +1,10 @@
-import { ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, getSchemaPath, ApiExtraModels } from '@nestjs/swagger';
 
 import { Conflict } from '../../conflicts/models/conflict';
 import { FullResolution } from '../../resolutions/models/full-resolution';
 import { Resolution } from '../../resolutions/models/resolution';
 
+@ApiExtraModels(FullResolution, Resolution)
 export class PaginationResult<T> {
     @ApiProperty()
     currentPage: number;
@@ -20,7 +21,6 @@ export class PaginationResult<T> {
     @ApiPropertyOptional()
     lastPage?: number;
 
-    // FIXME: resolution doesn't show on swagger
     @ApiProperty({
         oneOf: [
             { $ref: getSchemaPath(Conflict) },

@@ -1,6 +1,7 @@
 import {
     Controller, Get, Query, Param, NotFoundException, Post, Body, Put, Delete, HttpStatus,
-    InternalServerErrorException, BadRequestException, ParseUUIDPipe, HttpCode } from '@nestjs/common';
+    InternalServerErrorException, BadRequestException, ParseUUIDPipe, HttpCode
+} from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
 
 import { ApiHttpResponse } from '../global/models/common/api-http-response';
@@ -41,7 +42,9 @@ export class ConflictsController {
         description: 'Query is invalid.'
     })
     async queryConflicts(@Body(new GeojsonValidationPipe('geojson')) body?: ConflictQueryDto,
-        @Query(new OrderByValidationPipe([tableNames.conflicts])) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
+        @Query(new OrderByValidationPipe([tableNames.conflicts])) query?: any,
+        @Query() orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
+        orderByOptions = query?.validOrderByOptions;
         const { page, limit, from, to, geojson, keywords, resolved } = body;
         const conflictQueryParams = new ConflictQueryParams(
             from,
@@ -64,9 +67,10 @@ export class ConflictsController {
         status: HttpStatus.OK,
         type: PaginationResult
     })
-    // TODO: should create type for TextSearchDto + OrderByOptions?
-    async searchConflicts(@Query() query: TextSearchDto, @Query(new OrderByValidationPipe([tableNames.conflicts])) orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
-        const result = await this.conflictsService.search(query.text, new PaginationConfig(query.page, query.limit), orderByOptions);
+    async searchConflicts(@Query() textSearchDto: TextSearchDto, @Query(new OrderByValidationPipe([tableNames.conflicts])) query?: any,
+    @Query() orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
+        orderByOptions = query?.validOrderByOptions;
+        const result = await this.conflictsService.search(textSearchDto.text, new PaginationConfig(textSearchDto.page, textSearchDto.limit), orderByOptions);
         return this.responseHelper.success(result);
     }
 

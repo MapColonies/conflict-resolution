@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { ORDER_BY_TABLE_COLUMNS } from '../constants';
-import { OrderByTypes, ExposedOrderByTypes, SortByTypes } from './order-by-types';
+import { OrderByTypes, AllOrderByTypes, SortByTypes } from './order-by-types';
 
 export class OrderByOptions {
     constructor(columnName: string, sortType: SortByTypes) {
@@ -8,8 +8,8 @@ export class OrderByOptions {
         this.sortType = sortType;
     }
 
-    @ApiPropertyOptional({ enum: ExposedOrderByTypes, enumName: 'ExposedOrderByTypes' })
-    columnName: ExposedOrderByTypes;
+    @ApiPropertyOptional({ enum: AllOrderByTypes, enumName: 'AllOrderByTypes' })
+    columnName: AllOrderByTypes;
 
     @ApiPropertyOptional({ enum: SortByTypes, enumName: 'SortByTypes' })
     sortType?: SortByTypes;
