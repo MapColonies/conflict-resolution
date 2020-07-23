@@ -24,7 +24,7 @@ export const getAllResolutions = async (knex: Knex, queryParams: ResolutionQuery
 
 export const searchResolutions = async (knex: Knex, fieldNames: string[], text: string, paginationConf: PaginationConfig, includeConflict?: boolean, orderByOptions?: OrderByOptions) => {
   const query = knex(tableNames.resolutions);
-  addTextSearch(query, fieldNames, text);
+  addTextSearch(query, fieldNames, text, tableNames.resolutions);
   if (!includeConflict) {
     return await callQuery(query, null, paginationConf, orderByOptions);
   }
@@ -44,44 +44,44 @@ export const getResolutionById = async (knex: Knex, id: string, includeConflict?
 
 const joinWithConflicts = (query: knexQuery) => {
   joinQuery(query, new QueryJoinObject(tableNames.resolutions, tableNames.conflicts,
-    [{ leftColumn: `${tableNames.resolutions}.conflict_id`, rigthColumn: `${tableNames.conflicts}.id` }]),
+    [{ leftColumn: `${tableNames.resolutions}.conflictId`, rigthColumn: `${tableNames.conflicts}.id` }]),
     postgis.asGeoJSON('location'),
     ['*',
-      'resolutions.created_at as resolution_created_at',
-      'resolutions.updated_at as resolution_updated_at',
-      'resolutions.deleted_at as resolution_deleted_at']);
+      'resolutions.createdAt as resolutionCreatedAt',
+      'resolutions.updatedAt as resolutionUpdatedAt',
+      'resolutions.deletedAt as resolutionDeletedAt']);
   return query;
 }
 
 const deconstructToConflictAndResolution = (fullConflictsAndResolutions) => {
   return fullConflictsAndResolutions.map((fullConflictAndResolution) => {
     // fields to be removed
-    const { conflict_id, deleted_at, ...conflictAndResolution } = fullConflictAndResolution;
+    const { conflictId, deletedAt, ...conflictAndResolution } = fullConflictAndResolution;
 
     // deconstract the resolution fields
     const {
-      resolution_id,
-      resolution_server,
-      resolution_entity,
-      resolution_created_at,
-      resolution_updated_at,
-      resolution_deleted_at,
-      resolved_by_id,
-      resolved_by,
+      resolutionId,
+      resolutionServer,
+      resolutionEntity,
+      resolutionCreatedAt,
+      resolutionUpdatedAt,
+      resolutionDeletedAt,
+      resolvedById,
+      resolvedBy,
       ...conflict
     } = conflictAndResolution;
 
     conflict.location = textToGeojson(conflict.location);
 
     return {
-      resolution_id,
-      resolution_server,
-      resolution_entity,
-      resolution_created_at,
-      resolution_updated_at,
-      resolution_deleted_at,
-      resolved_by_id,
-      resolved_by,
+      resolutionId,
+      resolutionServer,
+      resolutionEntity,
+      resolutionCreatedAt,
+      resolutionUpdatedAt,
+      resolutionDeletedAt,
+      resolvedById,
+      resolvedBy,
       conflict,
     };
   });

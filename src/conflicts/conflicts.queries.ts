@@ -29,7 +29,7 @@ export const buildConflictsQuery = (query: knexQuery, queryParams: ConflictQuery
     })
   }
   if (queryParams.hasResolved !== undefined) {
-    query.andWhere('has_resolved', queryParams.hasResolved);
+    query.andWhere('hasResolved', queryParams.hasResolved);
   }
   if (queryParams.keywords.length > 0) {
     query.andWhere((query: knexQuery) => {
@@ -40,5 +40,5 @@ export const buildConflictsQuery = (query: knexQuery, queryParams: ConflictQuery
       });
     });
   }
-  timeQuery(query, 'created_at', queryParams.from, queryParams.to);
+  timeQuery(query, 'createdAt', queryParams.from, queryParams.to);
 }

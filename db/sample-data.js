@@ -1,11 +1,11 @@
 module.exports = [
   {
-    source_server: 'server1',
-    target_server: 'server2',
-    source_entity: {
+    sourceServer: 'server1',
+    targetServer: 'server2',
+    sourceEntity: {
       bla: "blu"
     },
-    target_entity: {
+    targetEntity: {
       "elements": [
         {
           "type": "way",
@@ -37,37 +37,37 @@ module.exports = [
         }
       ]
     },
-    source_change_type: 'modify',
-    target_change_type: 'delete',
+    sourceChangeType: 'modify',
+    targetChangeType: 'delete',
     description: 'some desc 1',
-    has_resolved: false,
+    hasResolved: false,
   },
   {
-    source_server: 'server3',
-    target_server: 'server4',
-    source_entity: {
+    sourceServer: 'server3',
+    targetServer: 'server4',
+    sourceEntity: {
       numnum: '123'
     },
-    target_entity: {
+    targetEntity: {
       numnum: '777'
     },
-    source_change_type: 'delete',
-    target_change_type: 'none',
+    sourceChangeType: 'delete',
+    targetChangeType: 'none',
     description: 'some desc 2',
-    has_resolved: true,
+    hasResolved: true,
   },
   {
-    source_server: 'server4',
-    target_server: 'server1',
-    source_entity: {
+    sourceServer: 'server4',
+    targetServer: 'server1',
+    sourceEntity: {
       numnum: '444'
     },
-    target_entity: {
+    targetEntity: {
       numnum: '111'
     },
-    source_change_type: 'create',
-    target_change_type: 'create',
+    sourceChangeType: 'create',
+    targetChangeType: 'create',
     description: 'some desc 3',
-    has_resolved: false,
+    hasResolved: false,
   },
 ];

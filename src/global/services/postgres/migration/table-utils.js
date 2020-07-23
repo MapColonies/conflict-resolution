@@ -2,7 +2,7 @@ const pluralize = require('pluralize');
 
 const addDefaultColumns = table => {
   table.timestamps(false, true);
-  table.datetime('deleted_at');
+  table.datetime('deletedAt');
 };
 
 const createDummyTable = (knex, tableName) => {
@@ -20,7 +20,7 @@ const createReference = (
   columnName = '',
 ) => {
   const definition = table
-    .uuid(`${columnName || convertToSingular(tableName)}_id`)
+    .uuid(`${columnName || convertToSingular(tableName)}Id`)
     .references('id')
     .inTable(tableName)
     .onDelete(deleteFunc);
@@ -32,7 +32,7 @@ const createReference = (
 };
 
 const rollbackDropReference = async (knex, tableName, foreignKey) => {
-  const fkName = `${convertToSingular(foreignKey)}_id`;
+  const fkName = `${convertToSingular(foreignKey)}Id`;
   await knex.schema.table(tableName, async t => {
     t.dropForeign(fkName);
     t.dropColumn(fkName);

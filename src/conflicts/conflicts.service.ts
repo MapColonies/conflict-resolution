@@ -45,7 +45,7 @@ export class ConflictsService {
 
     async search(text: string, paginationConfig: PaginationConfig, orderByOptions?: OrderByOptions) {
         const res = await this.queryService.fullTextSearch(tableNames.conflicts,
-            ["target_entity", "source_entity"],
+            ["targetEntity", "sourceEntity"],
             text,
             paginationConfig,
             postgis.asGeoJSON('location'),
@@ -89,9 +89,9 @@ export class ConflictsService {
                     await this.queryService.createRecord(tableNames.resolutions, resolution, null, null, trx)
                 );
                 
-                conflict.has_resolved = true;
-                conflict.resolved_at = createdResolution.created_at;
-                conflict.resolution_id = createdResolution.id;
+                conflict.hasResolved = true;
+                conflict.resolvedAt = createdResolution.createdAt;
+                conflict.resolutionId = createdResolution.id;
 
                 await this.queryService.updateRecord(
                     tableNames.conflicts,

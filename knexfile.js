@@ -1,17 +1,21 @@
 const { postgresConfig } = require('./src/config/postgres-config')
 
+const { knexSnakeCaseMappers } = require('objection');
 // FIXME: host should be 'postgis'(docker container name) while queries and 'localhost' while migations and seeds
 
 module.exports = {
   development: {
     client: 'pg',
     connection: postgresConfig,
+    format: str => 'aaaaaa',
+    ...knexSnakeCaseMappers(),
+    
     migrations: {
       directory: './db/migrations',
     },
     seeds: {
       directory: './db/seeds',
-    }
+    }    
   }
 };
 

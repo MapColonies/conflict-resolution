@@ -1,3 +1,5 @@
+import { snakeCase } from "change-case";
+
 import { trx, knexQuery, ExtendedKnexRaw } from 'src/global/services/postgres/knex-types';
 import { db } from './db-connection';
 import { OrderByOptions } from 'src/global/models/order-by-options';
@@ -13,6 +15,7 @@ export const countRecords = async (tableName: string, inTransaction?: trx): Prom
 
 export const countRecordsByQuery = async (query: any, inTransaction?: trx): Promise<knexQuery> => {
   const queryClone = query.clone();
+  // TODO: move to util
   const table = query?._single?.table;
   queryClone.groupBy(`${table}.id`).as('t');
   const countQuery = db.count('* as count').from(queryClone).first();
@@ -68,14 +71,15 @@ export const joinQuery = (query: knexQuery, joinObject: QueryJoinObject, selecti
   query.groupBy(`${joinObject.leftTable}.id`, `${joinObject.rightTable}.id`);
 }
 
-export const addTextSearch = (query: knexQuery, fieldNames: string[], text: string) => {
+export const addTextSearch = (query: knexQuery, fieldNames: string[], text: string, table?: string) => {
   const numOfFields = fieldNames.length;
   let rawQuery = '';
   fieldNames.map((fieldName: string, index: number) => {
+    const snakeCaseFieldName = table ? `${table}.${snakeCase(fieldName)}` : `${snakeCase(fieldName)}`
     if (numOfFields !== index + 1) {
-      rawQuery += (`to_tsvector('${TEXT_SEARCH_VECTOR_TYPE}', ${fieldName}::text) ||`)
+      rawQuery += (`to_tsvector('${TEXT_SEARCH_VECTOR_TYPE}', ${snakeCaseFieldName}::text) ||`)
     } else {
-      rawQuery += (`to_tsvector('${TEXT_SEARCH_VECTOR_TYPE}', ${fieldName}::text) @@ plainto_tsquery('${TEXT_SEARCH_VECTOR_TYPE}', '${text}')`)
+      rawQuery += (`to_tsvector('${TEXT_SEARCH_VECTOR_TYPE}', ${snakeCaseFieldName}::text) @@ plainto_tsquery('${TEXT_SEARCH_VECTOR_TYPE}', '${text}')`)
     }
   })
   query.whereRaw(rawQuery);

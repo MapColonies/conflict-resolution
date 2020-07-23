@@ -3,14 +3,14 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 export class BaseResolution {
 
     @ApiProperty()
-    resolution_server: string;
+    resolutionServer: string;
 
     @ApiProperty()
-    resolution_entity: object;
+    resolutionEntity: object;
 
     @ApiPropertyOptional()
-    resolved_by?: string;
+    resolvedBy?: string;
 
     @ApiPropertyOptional()
-    resolved_by_id?: string;;
+    resolvedById?: string;;
 }

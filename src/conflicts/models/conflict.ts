@@ -10,22 +10,22 @@ export class Conflict {
     id: string;
 
     @ApiProperty()
-    source_server: string;
+    sourceServer: string;
 
     @ApiProperty()
-    target_server: string;
+    targetServer: string;
 
     @ApiProperty({ type: () => OsmchangeElement })
-    source_entity: OsmchangeElement;
+    sourceEntity: OsmchangeElement;
 
     @ApiProperty({ type: () => OsmchangeElement })
-    target_entity: OsmchangeElement;
+    targetEntity: OsmchangeElement;
 
     @ApiProperty({ enum: OsmChangeType, enumName: 'OsmChangeType' })
-    source_change_type: OsmChangeType;
+    sourceChangeType: OsmChangeType;
 
     @ApiProperty({ enum: OsmChangeType, enumName: 'OsmChangeType' })
-    target_change_type: OsmChangeType;
+    targetChangeType: OsmChangeType;
 
     @ApiProperty()
     description: string;
@@ -34,20 +34,20 @@ export class Conflict {
     location?: GeoJSON | string;
 
     @ApiProperty()
-    has_resolved: boolean;
+    hasResolved: boolean;
 
     @ApiPropertyOptional()
-    resolved_at?: Date;
+    resolvedAt?: Date;
 
     @ApiPropertyOptional()
-    resolution_id?: string;
+    resolutionId?: string;
 
     @ApiProperty()
-    created_at: Date;
+    createdAt: Date;
 
     @ApiProperty()
-    updated_at: Date;
+    updatedAt: Date;
 
     @ApiPropertyOptional()
-    deleted_at?: Date;
+    deletedAt?: Date;
 }

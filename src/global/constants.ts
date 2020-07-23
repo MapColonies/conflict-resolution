@@ -11,8 +11,8 @@ export const MAX_SEARCH_LENGTH = 100;
 export const MIN_KEYOWRD_LENGTH = 3;
 export const KEYWORD_QUERY_COLUMNS = [
   'description',
-  'source_server',
-  'target_server',
+  'sourceServer',
+  'targetServer',
 ];
 
 export const CONFLICTS_ORDER_BY_COLUMNS = [OrderByTypes.conflictId, OrderByTypes.conflictCreatedAt, OrderByTypes.conflictLastUpdatedAt, OrderByTypes.conflictDeletedAt,

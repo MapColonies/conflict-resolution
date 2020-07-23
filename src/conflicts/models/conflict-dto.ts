@@ -11,33 +11,33 @@ export class ConflictDto {
     @IsString()
     @IsNotEmpty()
     @Type(() => String)
-    source_server: string;
+    sourceServer: string;
 
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
     @Type(() => String)
-    target_server: string;
+    targetServer: string;
 
     @ApiProperty({ type: () => OsmchangeElement })
     @IsObject()
     @ValidateNested()
     @Type(() => OsmchangeElement)
-    source_entity: OsmchangeElement;
+    sourceEntity: OsmchangeElement;
 
     @ApiProperty({ type: () => OsmchangeElement })
     @IsObject()
     @ValidateNested()
     @Type(() => OsmchangeElement)
-    target_entity: OsmchangeElement;
+    targetEntity: OsmchangeElement;
 
     @ApiProperty({ enum: OsmChangeType, enumName: 'OsmChangeType' })
     @IsEnum(OsmChangeType)
-    source_change_type: OsmChangeType;
+    sourceChangeType: OsmChangeType;
 
     @ApiProperty({ enum: OsmChangeType, enumName: 'OsmChangeType' })
     @IsEnum(OsmChangeType)
-    target_change_type: OsmChangeType;
+    targetChangeType: OsmChangeType;
     
     @ApiPropertyOptional()
     @IsString()

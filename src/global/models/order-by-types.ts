@@ -1,21 +1,21 @@
 export enum OrderByTypes {
     conflictId = 'conflicts.id',
-    conflictCreatedAt = 'conflicts.created_at',
-    conflictLastUpdatedAt = 'conflicts.updated_at',
-    conflictDeletedAt = 'conflicts.deleted_at',
-    conflictResolvedAt = 'conflicts.resolved_at',
-    conflictHasResolved = 'conflicts.has_resolved',
+    conflictCreatedAt = 'conflicts.createdAt',
+    conflictLastUpdatedAt = 'conflicts.updatedAt',
+    conflictDeletedAt = 'conflicts.deletedAt',
+    conflictResolvedAt = 'conflicts.resolvedAt',
+    conflictHasResolved = 'conflicts.hasResolved',
     conflictDescripton = 'conflicts.description',
-    conflictSourceServer = 'conflicts.source_server',
-    conflictTargetServer = 'conflicts.target_server',
-    conflictSourceChangeType = 'conflicts.source_change_type',
-    conflictTargetChangeType = 'conflicts.target_change_type',
+    conflictSourceServer = 'conflicts.sourceServer',
+    conflictTargetServer = 'conflicts.targetServer',
+    conflictSourceChangeType = 'conflicts.sourceChangeType',
+    conflictTargetChangeType = 'conflicts.targetChangeType',
     resolutionId = 'resolutions.id',
-    resolutionServer = 'resolutions.resolution_server',
-    resolutionResolvedBy = 'resolutions.resolved_by',
-    resolutionResolvedById = 'resolutions.resolved_by_id',
-    resolutionCreatedAt = 'resolutions.created_at',
-    resolutionLastUpdatedAt = 'resolutions.updated_at'
+    resolutionServer = 'resolutions.resolutionServer',
+    resolutionResolvedBy = 'resolutions.resolvedBy',
+    resolutionResolvedById = 'resolutions.resolvedById',
+    resolutionCreatedAt = 'resolutions.createdAt',
+    resolutionLastUpdatedAt = 'resolutions.updatedAt'
 }
 
 export enum SortByTypes {

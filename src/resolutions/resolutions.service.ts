@@ -32,7 +32,7 @@ export class ResolutionsService {
         }
         return await searchResolutions(
             this.knex,
-            [`${tableNames.resolutions}.resolution_entity`],
+            [`resolutionEntity`],
             text,
             paginationConfig,
             includeConflict,
@@ -60,14 +60,14 @@ export class ResolutionsService {
                 // get resolution's conflict and update it
                 const conflict = await this.queryService.getRecordById(
                     tableNames.conflicts,
-                    resolution.conflict_id,
+                    resolution.conflictId,
                     null,
                     null,
                     trx
                 );
 
-                conflict.has_resolved = false;
-                conflict.resolved_at = null;
+                conflict.hasResolved = false;
+                conflict.resolvedAt = null;
 
                 await this.queryService.updateRecord(
                     tableNames.conflicts,

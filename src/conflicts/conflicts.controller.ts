@@ -146,22 +146,22 @@ export class ConflictsController {
         if (!conflict) {
             throw new NotFoundException();
         }
-        if (conflict.has_resolved) {
+        if (conflict.hasResolved) {
             throw new BadRequestException(null, 'Conflict was already resolved.')
         }
         const { selectedServer, resolvedBy } = body;
         // TODO: refactor
         let winner: { server: string, entity: object };
-        if (conflict.source_server === selectedServer) {
+        if (conflict.sourceServer === selectedServer) {
             winner = {
-                server: conflict.source_server,
-                entity: conflict.source_entity,
+                server: conflict.sourceServer,
+                entity: conflict.sourceEntity,
             };
         }
-        if (conflict.target_server === selectedServer) {
+        if (conflict.targetServer === selectedServer) {
             winner = {
-                server: conflict.target_server,
-                entity: conflict.target_entity,
+                server: conflict.targetServer,
+                entity: conflict.targetEntity,
             };
         }
         if (!winner) {
@@ -169,10 +169,10 @@ export class ConflictsController {
         }
 
         await this.conflictsService.resolve(conflict, {
-            resolution_server: winner.server,
-            resolution_entity: winner.entity,
-            conflict_id: id,
-            resolved_by: resolvedBy
+            resolutionServer: winner.server,
+            resolutionEntity: winner.entity,
+            conflictId: id,
+            resolvedBy: resolvedBy
         });
 
         return this.responseHelper.success(await this.conflictsService.getById(id));
