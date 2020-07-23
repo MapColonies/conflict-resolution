@@ -4,7 +4,7 @@ import { Type } from "class-transformer";
 
 import { CustomGeoJson } from 'src/global/models/custom-geojson';
 
-export class ConflictQueryDto {
+export class ResolutionQueryDto {
     @ApiPropertyOptional()
     @IsOptional()
     @IsInt()
@@ -34,5 +34,5 @@ export class ConflictQueryDto {
     @ApiPropertyOptional()
     @IsOptional()
     @IsBoolean()
-    resolved?: boolean;
+    includeConflict?: boolean;
 }

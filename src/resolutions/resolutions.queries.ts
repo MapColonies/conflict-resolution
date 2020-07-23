@@ -1,4 +1,5 @@
-import { db } from '../global/services/postgres/db-connection';
+import { Knex } from 'nestjs-knex';
+
 import { postgis } from '../global/services/postgis';
 import tableNames = require('../global/services/postgres/table-names');
 import { PaginationConfig } from 'src/global/models/pagination-config';
@@ -9,11 +10,11 @@ import { QueryJoinObject } from 'src/global/services/postgres/query-join-object'
 import { knexQuery } from 'src/global/services/postgres/knex-types';
 import { BaseResolution } from './models/base-resolution';
 import { textToGeojson } from 'src/util';
+import { ResolutionQueryParams } from './models/resolution-query-params';
 
-// TODO: kenx should be used with nest-knex? move functions into a service?
-export const getAllResolutions = async (includeConflict?: boolean, paginationConf?: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<BaseResolution>> => {
-  const query = db(tableNames.resolutions);
-  if (!includeConflict) {
+export const getAllResolutions = async (knex: Knex, queryParams: ResolutionQueryParams, paginationConf?: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<BaseResolution>> => {
+  const query = knex(tableNames.resolutions);
+  if (!queryParams.includeConflict) {
     return await callQuery(query, null, paginationConf, orderByOptions);
   }
   const queryResult = await callQuery(joinWithConflicts(query), null, paginationConf, orderByOptions);
@@ -21,17 +22,8 @@ export const getAllResolutions = async (includeConflict?: boolean, paginationCon
   return queryResult;
 };
 
-export const getResolutionById = async (id: string, includeConflict?: boolean): Promise<BaseResolution> => {
-  const query = db(tableNames.resolutions).where('resolutions.id', id);
-  if (!includeConflict) {
-    return (await callQuery(query))[0];
-  }
-  const fullConflictsAndResolutions = await callQuery(joinWithConflicts(query));
-  return (deconstructToConflictAndResolution(fullConflictsAndResolutions))[0];
-};
-
-export const searchResolutions = async (fieldNames: string[], text: string, paginationConf: PaginationConfig, includeConflict?: boolean, orderByOptions?: OrderByOptions) => {
-  const query = db(tableNames.resolutions);
+export const searchResolutions = async (knex: Knex, fieldNames: string[], text: string, paginationConf: PaginationConfig, includeConflict?: boolean, orderByOptions?: OrderByOptions) => {
+  const query = knex(tableNames.resolutions);
   addTextSearch(query, fieldNames, text);
   if (!includeConflict) {
     return await callQuery(query, null, paginationConf, orderByOptions);
@@ -40,6 +32,15 @@ export const searchResolutions = async (fieldNames: string[], text: string, pagi
   queryResult.data = deconstructToConflictAndResolution(queryResult.data);
   return queryResult;
 }
+
+export const getResolutionById = async (knex: Knex, id: string, includeConflict?: boolean): Promise<BaseResolution> => {
+  const query = knex(tableNames.resolutions).where('resolutions.id', id);
+  if (!includeConflict) {
+    return (await callQuery(query))[0];
+  }
+  const fullConflictsAndResolutions = await callQuery(joinWithConflicts(query));
+  return (deconstructToConflictAndResolution(fullConflictsAndResolutions))[0];
+};
 
 const joinWithConflicts = (query: knexQuery) => {
   joinQuery(query, new QueryJoinObject(tableNames.resolutions, tableNames.conflicts,
@@ -52,7 +53,6 @@ const joinWithConflicts = (query: knexQuery) => {
   return query;
 }
 
-// TODO: build dynamic \ better way
 const deconstructToConflictAndResolution = (fullConflictsAndResolutions) => {
   return fullConflictsAndResolutions.map((fullConflictAndResolution) => {
     // fields to be removed

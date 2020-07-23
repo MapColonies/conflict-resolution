@@ -8,9 +8,8 @@ export class ResolutionQueryParams implements QueryParams {
     public from: Date;
     public to: Date;
     public keywords: string[] = [];
-    public includeConflict: boolean;
   
-    constructor(from?: number, to?: number, public geojson?: CustomGeoJson, keywords?: string[]) {
+    constructor(from?: number, to?: number, public geojson?: CustomGeoJson, keywords?: string[], public includeConflict?: boolean) {
       this.from = unixMillisecondsToDate(from);
       this.to = unixMillisecondsToDate(to);
       if (keywords) {

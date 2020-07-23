@@ -13,12 +13,13 @@ import { ConflictQueryParams } from 'src/conflicts/models/conflict-query-params'
 import { PaginationConfig } from 'src/global/models/pagination-config';
 import { ConflictQueryDto } from 'src/conflicts/models/conflict-query-dto';
 import { ResolveDto } from 'src/resolutions/models/resolve-dto';
-import { TextSearchDto } from '../global/models/text-search-dto';
+import { TextSearchPaginationDto } from '../global/models/text-search-dto';
 import { ResponseHelperService } from 'src/shared/response-helper.service';
 import { GeojsonValidationPipe } from 'src/shared/geojson-validation.pipe';
 import { OrderByOptions } from 'src/global/models/order-by-options';
 import { OrderByValidationPipe } from 'src/shared/order-by-validation.pipe';
 import tableNames = require('../global/services/postgres/table-names');
+import { PaginationQueryDto } from 'src/global/models/pagination-query-dto';
 
 // TODO: add bbox endpoint
 @ApiTags('conflicts')
@@ -43,9 +44,10 @@ export class ConflictsController {
     })
     async queryConflicts(@Body(new GeojsonValidationPipe('geojson')) body?: ConflictQueryDto,
         @Query(new OrderByValidationPipe([tableNames.conflicts])) query?: any,
+        @Query() paginationQueryDto?: PaginationQueryDto,
         @Query() orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
-        orderByOptions = query?.validOrderByOptions;
-        const { page, limit, from, to, geojson, keywords, resolved } = body;
+        const { from, to, geojson, keywords, resolved } = body;
+        const { page, limit } = paginationQueryDto;
         const conflictQueryParams = new ConflictQueryParams(
             from,
             to,
@@ -53,6 +55,7 @@ export class ConflictsController {
             keywords,
             resolved
         );
+        orderByOptions = query?.validOrderByOptions;
         const result = await this.conflictsService.query(
             conflictQueryParams,
             new PaginationConfig(page, limit),
@@ -67,7 +70,7 @@ export class ConflictsController {
         status: HttpStatus.OK,
         type: PaginationResult
     })
-    async searchConflicts(@Query() textSearchDto: TextSearchDto, @Query(new OrderByValidationPipe([tableNames.conflicts])) query?: any,
+    async searchConflicts(@Query() textSearchDto: TextSearchPaginationDto, @Query(new OrderByValidationPipe([tableNames.conflicts])) query?: any,
     @Query() orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
         orderByOptions = query?.validOrderByOptions;
         const result = await this.conflictsService.search(textSearchDto.text, new PaginationConfig(textSearchDto.page, textSearchDto.limit), orderByOptions);

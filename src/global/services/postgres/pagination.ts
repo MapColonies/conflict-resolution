@@ -1,13 +1,12 @@
-import { countRecordsByQuery, callQuery } from './common-queries';
+import { callQuery } from './common-queries';
 import { PaginationConfig } from '../../models/pagination-config';
-import { trx } from './knex-types';
+import { trx, knexQuery } from './knex-types';
 
-export const paginate = async (query: any, paginationConfig: PaginationConfig, inTransaction?: trx) => {
+export const paginate = async (countFunction: Function, query: knexQuery, paginationConfig: PaginationConfig, inTransaction?: trx) => {
   const result: any = {};
   paginationConfig.fillData(result);
   if (paginationConfig.getCount) {
-    // TODO: get the count func as variable
-    result.total = +(await countRecordsByQuery(query, inTransaction)).count;
+    result.total = +(await countFunction(query, inTransaction)).count;
     result.lastPage = Math.ceil(result.total / result.perPage);
   }
   query.offset(paginationConfig.offset).limit(paginationConfig.perPage);

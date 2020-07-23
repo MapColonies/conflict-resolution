@@ -1,4 +1,4 @@
-import {Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { InjectKnex, Knex } from 'nestjs-knex';
 
 import { getAllResolutions, getResolutionById, searchResolutions } from './resolutions.queries';
@@ -10,30 +10,38 @@ import { trx } from 'src/global/services/postgres/knex-types';
 import { OrderByOptions } from 'src/global/models/order-by-options';
 import { Resolution } from './models/resolution';
 import { BaseResolution } from './models/base-resolution';
+import { ResolutionQueryParams } from './models/resolution-query-params';
 
 @Injectable()
 export class ResolutionsService {
     constructor(
         @InjectKnex() private readonly knex: Knex,
         private readonly queryService: QueryService
-      ) {}
+    ) { }
 
-    async getAll(includeConflicts: boolean, paginationConf: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<BaseResolution>> {
-        return await getAllResolutions(includeConflicts, paginationConf, orderByOptions);
+    async getAll(resolutionQueryParams: ResolutionQueryParams, paginationConf: PaginationConfig, orderByOptions: OrderByOptions): Promise<PaginationResult<BaseResolution>> {
+        if (!resolutionQueryParams.isValid() || !validateQueryParamsAndOrderBy(orderByOptions, resolutionQueryParams.includeConflict)) {
+            throw new BadRequestException(null, 'Query is invalid.')
+        }
+        return await getAllResolutions(this.knex, resolutionQueryParams, paginationConf, orderByOptions);
     };
 
-    async search(includeConflicts: boolean, text: string, paginationConfig: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<BaseResolution>> {
+    async search(includeConflict: boolean, text: string, paginationConfig: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<BaseResolution>> {
+        if (!validateQueryParamsAndOrderBy(orderByOptions, includeConflict)) {
+            throw new BadRequestException(null, 'Query is invalid.')
+        }
         return await searchResolutions(
+            this.knex,
             [`${tableNames.resolutions}.resolution_entity`],
             text,
             paginationConfig,
-            includeConflicts,
+            includeConflict,
             orderByOptions
         );
     };
 
     async getById(id: string, includeConflic?: boolean): Promise<BaseResolution> {
-        return await getResolutionById(id, includeConflic);
+        return await getResolutionById(this.knex, id, includeConflic);
     };
 
     async delete(resolution: Resolution): Promise<void> {
@@ -74,4 +82,15 @@ export class ResolutionsService {
             throw new InternalServerErrorException(null, 'Something went wrong, please try again.')
         }
     }
+}
+
+const validateQueryParamsAndOrderBy = (orderByOptions?: OrderByOptions, includeConflict?: boolean): boolean => {
+    let tables = [tableNames.resolutions];
+    if (includeConflict) {
+        tables.push(tableNames.conflicts)
+    }
+    if (orderByOptions ? !orderByOptions?.isValid(tables) : false) {
+        return false;
+    }
+    return true;
 }

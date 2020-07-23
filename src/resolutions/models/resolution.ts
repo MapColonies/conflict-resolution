@@ -1,7 +1,7 @@
-import { ApiProperty, PartialType } from "@nestjs/swagger";
+import { ApiProperty, PartialType, PickType } from "@nestjs/swagger";
 import { BaseResolution } from "./base-resolution";
 
-export class Resolution extends PartialType(BaseResolution) {
+export class Resolution extends PickType(BaseResolution, ['resolution_entity', 'resolution_server', 'resolved_by', 'resolved_by_id'] as const) {
     @ApiProperty()
     id: string;
 

@@ -5,7 +5,6 @@ import { PaginationConfig } from 'src/global/models/pagination-config';
 import { paginate } from './pagination';
 import { QueryJoinObject } from './query-join-object';
 import { TEXT_SEARCH_VECTOR_TYPE } from './migration/custom-functions';
-import tableNames = require('./table-names');
 
 export const countRecords = async (tableName: string, inTransaction?: trx): Promise<knexQuery> => {
   const query = db(tableName).count('* as count').first();
@@ -33,15 +32,14 @@ export const callQuery = async (query: knexQuery, inTransaction?: trx, paginatio
     query.transacting(inTransaction);
   }
   if (paginationConf) {
-    return await paginate(query, paginationConf)
+    return await paginate(this.countRecordsByQuery, query, paginationConf)
   }
   return await query;
 };
 
-// TODO: should we have validation here? and if so should we have the tableNames as parameter?
 export const orderByQuery = (query: knexQuery, orderByOptions: OrderByOptions): void => {
-  if (orderByOptions?.isValid([tableNames.conflicts, tableNames.resolutions])) {
-    query?.orderBy(orderByOptions.columnName, orderByOptions.sortType)
+  if (orderByOptions?.columnName) {
+    query?.orderBy(orderByOptions.columnName, orderByOptions.sortType);
   }
 }
 

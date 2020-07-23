@@ -15,16 +15,16 @@ export class OrderByOptions {
     sortType?: SortByTypes;
 
     isValid(tableNames: string[]): boolean {
-        let arr = [];
+        let validColumns = [];
         tableNames.forEach(tableName => {
             if (ORDER_BY_TABLE_COLUMNS[tableName]) {
-                arr.push(...ORDER_BY_TABLE_COLUMNS[tableName])
+                validColumns.push(...ORDER_BY_TABLE_COLUMNS[tableName])
             }
         })
-        if (!arr.includes(this.columnName)) {
+        if (!validColumns.includes(this.columnName)) {
             return false;
         }
-        if (this.sortType === undefined) {
+        if (!this.sortType) {
             this.sortType = SortByTypes.ASC;
         }
         return true;
