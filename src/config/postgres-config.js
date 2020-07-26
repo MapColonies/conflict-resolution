@@ -5,7 +5,7 @@ simillarly port should be of the host's when migrating and seeding and of the co
 */
 
 exports.postgresConfig = {
-    host: process.env.POSTGRES_HOST,
+    host: process.env.POSTGRES_CONTAINER_HOST,
     database: process.env.POSTGRES_DB,
     user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
