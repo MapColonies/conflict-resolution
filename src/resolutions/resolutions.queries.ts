@@ -5,20 +5,22 @@ import tableNames = require('../global/services/postgres/table-names');
 import { PaginationConfig } from 'src/global/models/pagination-config';
 import { PaginationResult } from 'src/global/models/pagination-result';
 import { OrderByOptions } from 'src/global/models/order-by-options';
-import { callQuery, joinQuery, addTextSearch } from 'src/global/services/postgres/common-queries';
+import { callQuery, joinQuery, addTextSearch, geometryWithinIntersectsQuery, likeQuery, timeQuery, bboxQuery } from 'src/global/services/postgres/common-queries';
 import { QueryJoinObject } from 'src/global/services/postgres/query-join-object';
 import { knexQuery } from 'src/global/services/postgres/knex-types';
 import { BaseResolution } from './models/base-resolution';
 import { textToGeojson } from 'src/util';
 import { ResolutionQueryParams } from './models/resolution-query-params';
+import { KEYWORD_QUERY_COLUMNS } from 'src/global/constants';
 
-export const getAllResolutions = async (knex: Knex, queryParams: ResolutionQueryParams, paginationConf?: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<BaseResolution>> => {
+export const queryResolutions = async (knex: Knex, queryParams: ResolutionQueryParams, paginationConf?: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<BaseResolution>> => {
   const query = knex(tableNames.resolutions);
-  if (!queryParams.includeConflict) {
-    return await callQuery(query, null, paginationConf, orderByOptions);
+  buildResolutionsQuery(query, queryParams);
+  const queryResult = await callQuery(query, null, paginationConf, orderByOptions);
+  if (!queryParams.includeConflict && !queryParams.dependsOnConflicts()) {
+    return queryResult;
   }
-  const queryResult = await callQuery(joinWithConflicts(query), null, paginationConf, orderByOptions);
-  queryResult.data = deconstructToConflictAndResolution(queryResult.data);
+  queryResult.data = deconstructToConflictAndResolution(queryResult.data, queryParams.includeConflict);
   return queryResult;
 };
 
@@ -53,7 +55,7 @@ const joinWithConflicts = (query: knexQuery) => {
   return query;
 }
 
-const deconstructToConflictAndResolution = (fullConflictsAndResolutions) => {
+const deconstructToConflictAndResolution = (fullConflictsAndResolutions, includeConflict = true) => {
   return fullConflictsAndResolutions.map((fullConflictAndResolution) => {
     // fields to be removed
     const { conflictId, deletedAt, ...conflictAndResolution } = fullConflictAndResolution;
@@ -71,18 +73,45 @@ const deconstructToConflictAndResolution = (fullConflictsAndResolutions) => {
       ...conflict
     } = conflictAndResolution;
 
+    const resolution = {
+      resolutionId,
+        resolutionServer,
+        resolutionEntity,
+        resolutionCreatedAt,
+        resolutionUpdatedAt,
+        resolutionDeletedAt,
+        resolvedById,
+        resolvedBy
+    }
+
+    if (!includeConflict) {
+      return {
+        ...resolution,
+        conflictId
+      };
+    }
+
     conflict.location = textToGeojson(conflict.location);
 
     return {
-      resolutionId,
-      resolutionServer,
-      resolutionEntity,
-      resolutionCreatedAt,
-      resolutionUpdatedAt,
-      resolutionDeletedAt,
-      resolvedById,
-      resolvedBy,
+      ...resolution,
       conflict,
     };
   });
 };
+
+const buildResolutionsQuery = (query: knexQuery, queryParams: ResolutionQueryParams): void => {
+  if (queryParams.dependsOnConflicts()) {
+    joinWithConflicts(query);
+  }
+  if (queryParams.geojson) {
+    geometryWithinIntersectsQuery(query, `${tableNames.conflicts}.location`, queryParams.geojson);
+  }
+  if (queryParams.bbox) {
+    bboxQuery(query, `${tableNames.conflicts}.location`, queryParams.bbox);
+  }
+  if (queryParams.keywords.length > 0) {
+    likeQuery(query, queryParams.keywords, KEYWORD_QUERY_COLUMNS)
+  }
+  timeQuery(query, `${tableNames.resolutions}.createdAt`, queryParams.from, queryParams.to);
+}

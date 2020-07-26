@@ -1,4 +1,5 @@
 import { OrderByTypes } from '../global/models/order-by-types';
+import tableNames = require('./services/postgres/table-names');
 
 export const MIN_PAGE = 0;
 export const DEFAULT_PER_PAGE = 10;
@@ -10,9 +11,9 @@ export const MAX_SEARCH_LENGTH = 100;
 
 export const MIN_KEYOWRD_LENGTH = 3;
 export const KEYWORD_QUERY_COLUMNS = [
-  'description',
-  'sourceServer',
-  'targetServer',
+  `${tableNames.conflicts}.description`,
+  `${tableNames.conflicts}.sourceServer`,
+  `${tableNames.conflicts}.targetServer`
 ];
 
 export const CONFLICTS_ORDER_BY_COLUMNS = [OrderByTypes.conflictId, OrderByTypes.conflictCreatedAt, OrderByTypes.conflictLastUpdatedAt, OrderByTypes.conflictDeletedAt,
@@ -26,3 +27,5 @@ export const ORDER_BY_TABLE_COLUMNS = {
   conflicts: CONFLICTS_ORDER_BY_COLUMNS,
   resolutions: RESOLUTIONS_ORDER_BY_COLUMNS
 }
+
+export const MAX_DATE = new Date(9999, 12);

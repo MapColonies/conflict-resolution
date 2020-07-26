@@ -1,36 +1,9 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsObject, ValidateNested, IsBoolean, IsArray, Min } from 'class-validator';
-import { Type } from "class-transformer";
+import { ApiPropertyOptional, PickType } from '@nestjs/swagger';
+import { IsOptional, IsBoolean } from 'class-validator';
 
-import { CustomGeoJson } from 'src/global/models/custom-geojson';
+import { BaseQueryDto } from 'src/global/models/base-query-dto';
 
-export class ResolutionQueryDto {
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsInt()
-    @Min(0)
-    @Type(() => Number)
-    from?: number;
-
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsInt()
-    @Min(0)
-    @Type(() => Number)
-    to?: number;
-
-    @ApiPropertyOptional({ type: () => CustomGeoJson })
-    @IsOptional()
-    @IsObject()
-    @ValidateNested()
-    @Type(() => CustomGeoJson)
-    geojson?: CustomGeoJson;
-
-    @ApiPropertyOptional({ type: [String] })
-    @IsOptional()
-    @IsArray()
-    keywords?: string[];
-
+export class ResolutionQueryDto extends PickType(BaseQueryDto, ['from', 'to', 'geojson', 'bbox', 'keywords'] as const) {
     @ApiPropertyOptional()
     @IsOptional()
     @IsBoolean()

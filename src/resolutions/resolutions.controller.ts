@@ -38,21 +38,21 @@ export class ResolutionsController {
         status: HttpStatus.BAD_REQUEST,
         description: 'Query is invalid.'
     })
-    async getAllResolutions(@Body(new GeojsonValidationPipe('geojson')) body?: ResolutionQueryDto,
+    async queryResolutions(@Body(new GeojsonValidationPipe('geojson')) body?: ResolutionQueryDto,
      @Query(new OrderByValidationPipe([tableNames.resolutions, tableNames.conflicts])) query?: any,
       @Query() orderByOptions?: OrderByOptions, @Query() paginationQueryDto?: PaginationQueryDto): Promise<ApiHttpResponse<PaginationResult<BaseResolution>>> {
-        const { from, to, geojson, keywords, includeConflict } = body;
+        const { from, to, geojson, bbox, keywords, includeConflict } = body;
         const { page, limit } = paginationQueryDto;
         const resolutionQueryParams = new ResolutionQueryParams(
             from,
             to,
             geojson,
+            bbox,
             keywords,
             includeConflict
         );
         orderByOptions = query?.validOrderByOptions;
-        // TODO: query resolutions based on ResolutionQueryParams
-        const resolutions = await this.resolutionsService.getAll(resolutionQueryParams, new PaginationConfig(page, limit), orderByOptions);
+        const resolutions = await this.resolutionsService.query(resolutionQueryParams, new PaginationConfig(page, limit), orderByOptions);
         return this.responseHelper.success(resolutions);
     }
 
@@ -67,7 +67,7 @@ export class ResolutionsController {
       @Query() orderByOptions?: OrderByOptions)
       : Promise<ApiHttpResponse<PaginationResult<BaseResolution>>> {
         orderByOptions = query?.validOrderByOptions;
-        const resolutions = await this.resolutionsService.search(textSearchDto.includeConflict === 'true' ? true : false, textSearchDto.text, new PaginationConfig(textSearchDto.page, textSearchDto.limit), orderByOptions);
+        const resolutions = await this.resolutionsService.search(textSearchDto.includeConflict, textSearchDto.text, new PaginationConfig(textSearchDto.page, textSearchDto.limit), orderByOptions);
         return this.responseHelper.success(resolutions);
     }
 

@@ -16,3 +16,14 @@ export const createGeometryFromGeojson = (geojson: CustomGeoJson): ExtendedKnexR
     "coordinates": ${JSON.stringify(geojson.coordinates)}
    }`);
 }
+
+export type bbox = {
+  xMin: number,
+  yMin: number,
+  xMax: number,
+  yMax: number
+}
+
+export const createBoundingBox = (bbox: bbox, srid = DEFAULT_SRID): ExtendedKnexRaw => {
+  return postgis.makeEnvelope(bbox.xMin, bbox.yMin, bbox.xMax, bbox.yMax, srid);
+}

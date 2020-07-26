@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { InjectKnex, Knex } from 'nestjs-knex';
 
-import { getAllResolutions, getResolutionById, searchResolutions } from './resolutions.queries';
+import { queryResolutions, getResolutionById, searchResolutions } from './resolutions.queries';
 import { PaginationResult } from 'src/global/models/pagination-result';
 import { PaginationConfig } from 'src/global/models/pagination-config';
 import tableNames = require('../global/services/postgres/table-names');
@@ -19,11 +19,11 @@ export class ResolutionsService {
         private readonly queryService: QueryService
     ) { }
 
-    async getAll(resolutionQueryParams: ResolutionQueryParams, paginationConf: PaginationConfig, orderByOptions: OrderByOptions): Promise<PaginationResult<BaseResolution>> {
+    async query(resolutionQueryParams: ResolutionQueryParams, paginationConf: PaginationConfig, orderByOptions: OrderByOptions): Promise<PaginationResult<BaseResolution>> {
         if (!resolutionQueryParams.isValid() || !validateQueryParamsAndOrderBy(orderByOptions, resolutionQueryParams.includeConflict)) {
             throw new BadRequestException(null, 'Query is invalid.')
         }
-        return await getAllResolutions(this.knex, resolutionQueryParams, paginationConf, orderByOptions);
+        return await queryResolutions(this.knex, resolutionQueryParams, paginationConf, orderByOptions);
     };
 
     async search(includeConflict: boolean, text: string, paginationConfig: PaginationConfig, orderByOptions?: OrderByOptions): Promise<PaginationResult<BaseResolution>> {

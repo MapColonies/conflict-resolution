@@ -7,6 +7,10 @@ import { PaginationConfig } from 'src/global/models/pagination-config';
 import { paginate } from './pagination';
 import { QueryJoinObject } from './query-join-object';
 import { TEXT_SEARCH_VECTOR_TYPE } from './migration/custom-functions';
+import { CustomGeoJson } from "src/global/models/custom-geojson";
+import { postgis } from "../postgis";
+import { createGeometryFromGeojson, DEFAULT_SRID, createBoundingBox } from "../postgis/util";
+import { BoundingBox } from "src/global/models/boundingBox";
 
 export const countRecords = async (tableName: string, inTransaction?: trx): Promise<knexQuery> => {
   const query = db(tableName).count('* as count').first();
@@ -15,12 +19,13 @@ export const countRecords = async (tableName: string, inTransaction?: trx): Prom
 
 export const countRecordsByQuery = async (query: any, inTransaction?: trx): Promise<knexQuery> => {
   const queryClone = query.clone();
-  // TODO: move to util
-  const table = query?._single?.table;
+  const table = getCurrentTable(query);
   queryClone.groupBy(`${table}.id`).as('t');
   const countQuery = db.count('* as count').from(queryClone).first();
   return await callQuery(countQuery, inTransaction);
 }
+
+export const getCurrentTable = (query: any): string => query?._single?.table;
 
 export const setFields = (fields: string[]): string | string[] => {
   if (!fields) {
@@ -59,6 +64,44 @@ export const timeQuery = (query: knexQuery, fieldName: string, from: Date, to: D
     query.where(fieldName, '<', to);
   }
 };
+
+export const geometryWithinIntersectsQuery = (query: knexQuery, fieldName: string, geojson: CustomGeoJson, within = true, intersects = true) => {
+  const geometryA = postgis.setSRID(fieldName, DEFAULT_SRID);
+  const geometryB = postgis.setSRID(createGeometryFromGeojson(geojson), DEFAULT_SRID);
+  query.where(function () {
+    if (within && !intersects) {
+      this.where(postgis.within(geometryA, geometryB));
+    }
+    // within or touches or overlaps (knex-postgis doesn't have the last two functions)
+    if (intersects) {
+      this.orWhere(postgis.intersects(geometryA, geometryB));
+    }
+  })
+}
+
+export const bboxQuery = (query: knexQuery, fieldName: string, bbox: BoundingBox, contains = true, contained = false) => {
+  const geometry = postgis.setSRID(fieldName, DEFAULT_SRID);
+  const bb = createBoundingBox(bbox);
+  query.where(function () {
+    if (contains) {
+      this.where(postgis.boundingBoxContains(bb, geometry));
+    }
+    if (contained) {
+      this.orWhere(postgis.boundingBoxContained(bb, geometry));
+    }
+  })
+}
+
+// can be more dynamic if needed
+export const likeQuery = (query: knexQuery, array: any[], columnsNames: string[], and?: boolean) => {
+  query.andWhere((query: knexQuery) => {
+    array.map((item: any) => {
+      columnsNames.forEach((column: string) =>
+        and ? query.andWhere(column, 'LIKE', `%${item.toString()}%`) : query.orWhere(column, 'LIKE', `%${item.toString()}%`)
+      );
+    });
+  });
+}
 
 export const joinQuery = (query: knexQuery, joinObject: QueryJoinObject, selectionFunc?: ExtendedKnexRaw, fields?: string[]): void => {
   const joinColumnsMap = {}

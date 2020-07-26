@@ -21,7 +21,6 @@ import { OrderByValidationPipe } from 'src/shared/order-by-validation.pipe';
 import tableNames = require('../global/services/postgres/table-names');
 import { PaginationQueryDto } from 'src/global/models/pagination-query-dto';
 
-// TODO: add bbox endpoint
 @ApiTags('conflicts')
 @Controller('conflicts')
 export class ConflictsController {
@@ -46,12 +45,13 @@ export class ConflictsController {
         @Query(new OrderByValidationPipe([tableNames.conflicts])) query?: any,
         @Query() paginationQueryDto?: PaginationQueryDto,
         @Query() orderByOptions?: OrderByOptions): Promise<ApiHttpResponse<PaginationResult<Conflict>>> {
-        const { from, to, geojson, keywords, resolved } = body;
+        const { from, to, geojson, bbox, keywords, resolved } = body;
         const { page, limit } = paginationQueryDto;
         const conflictQueryParams = new ConflictQueryParams(
             from,
             to,
             geojson,
+            bbox,
             keywords,
             resolved
         );
@@ -108,6 +108,10 @@ export class ConflictsController {
     })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found.' })
     async updateConflict(@Param('id', ParseUUIDPipe) id: string, @Body(new GeojsonValidationPipe('location')) conflictDto: ConflictDto): Promise<ApiHttpResponse<Conflict>> {
+        const conflict = await this.conflictsService.getById(id, false);
+        if (!conflict) {
+            throw new NotFoundException();
+        }
         const updatedConflict = await this.conflictsService.update(id, conflictDto);
         if (!updatedConflict) {
             throw new NotFoundException();
@@ -150,7 +154,8 @@ export class ConflictsController {
             throw new BadRequestException(null, 'Conflict was already resolved.')
         }
         const { selectedServer, resolvedBy } = body;
-        // TODO: refactor
+        
+        // resolve strategy TBD
         let winner: { server: string, entity: object };
         if (conflict.sourceServer === selectedServer) {
             winner = {
