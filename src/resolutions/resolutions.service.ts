@@ -85,7 +85,7 @@ export class ResolutionsService {
 }
 
 const validateQueryParamsAndOrderBy = (orderByOptions?: OrderByOptions, includeConflict?: boolean): boolean => {
-    let tables = [tableNames.resolutions];
+    const tables = [tableNames.resolutions];
     if (includeConflict) {
         tables.push(tableNames.conflicts)
     }

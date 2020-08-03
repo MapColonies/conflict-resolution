@@ -38,7 +38,7 @@ export const convertToSingular = (word: string) => {
 }
 
 export const isObjectEmpty = (obj: any) => {
-    for(let key in obj) {
+    for(const key in obj) {
         if(obj.hasOwnProperty(key))
             return false;
     }

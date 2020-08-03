@@ -15,7 +15,7 @@ export class OrderByOptions {
     sortType?: SortByTypes;
 
     isValid(tableNames: string[]): boolean {
-        let validColumns = [];
+        const validColumns = [];
         tableNames.forEach(tableName => {
             if (ORDER_BY_TABLE_COLUMNS[tableName]) {
                 validColumns.push(...ORDER_BY_TABLE_COLUMNS[tableName])
