@@ -1,10 +1,15 @@
 {
-  "name": "conflict-resolution-nestjs",
-  "version": "0.0.1",
-  "description": "",
+  "name": "conflict-resolution",
+  "version": "0.1.0",
+  "description": "Backend service for conflict resolution",
   "author": "",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
@@ -21,7 +26,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "up": "docker-compose up -d",
     "down": "docker-compose down",
-    "rebuild": "docker-compose up -d --build -V"
+    "rebuild": "docker-compose up -d --build -V",
+    "release": "standard-version"
   },
   "dependencies": {
     "@mapbox/geojsonhint": "^3.0.0",
@@ -50,6 +56,8 @@
     "swagger-ui-express": "^4.1.4"
   },
   "devDependencies": {
+    "@commitlint/cli": "^9.1.1",
+    "@commitlint/config-conventional": "^9.1.1",
     "@nestjs/cli": "^7.0.0",
     "@nestjs/schematics": "^7.0.0",
     "@nestjs/testing": "^7.0.0",
@@ -59,12 +67,16 @@
     "@types/supertest": "^2.0.8",
     "@typescript-eslint/eslint-plugin": "^2.23.0",
     "@typescript-eslint/parser": "^2.23.0",
+    "commitlint": "^9.1.0",
+    "cz-conventional-changelog": "^3.2.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-import": "^2.20.1",
+    "husky": "^4.2.5",
     "jest": "^25.1.0",
     "nodemon": "^2.0.4",
     "prettier": "^1.19.1",
+    "standard-version": "^8.0.2",
     "supertest": "^4.0.2",
     "ts-jest": "25.2.1",
     "ts-loader": "^6.2.1",
