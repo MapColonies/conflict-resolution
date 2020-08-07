@@ -29,7 +29,7 @@
     "@nestjs/swagger": "^4.5.7",
     "@nestjsplus/knex": "^1.0.0",
     "@types/geojson": "^7946.0.7",
-    "class-transformer": "^0.2.3",
+    "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
     "dotenv": "^8.2.0",
     "geojson-validation": "^1.0.1",
